@@ -27,7 +27,7 @@ export function AppProvider({ children }: AppProviderProps) {
         
         /*
         if (!envSetup.hasValidCredentials) {
-          setEnvError('Missing or invalid Hedera credentials');
+          setEnvError('Missing or invalid blockchain credentials');
           setEnvInstructions(envSetup.instructions);
         } else {
           // Validate environment

@@ -6,7 +6,7 @@ This guide will help you deploy the Karibu application to Vercel's production en
 
 - A [Vercel account](https://vercel.com/signup)
 - Node.js 18+ and npm installed locally
-- A Hedera testnet or mainnet account with funds
+- An EVM-compatible testnet or mainnet account with funds (current support via Hedera)
 
 ## Preparing for Deployment
 
@@ -21,16 +21,20 @@ This guide will help you deploy the Karibu application to Vercel's production en
    Create a `.env.production` file with your actual credentials:
 
    ```
-   # Required Hedera account information
+   # Required blockchain account information (currently Hedera)
+   # TODO: Update for generic EVM
    HEDERA_OPERATOR_ID="0.0.YOUR_OPERATOR_ID"
    HEDERA_OPERATOR_KEY="YOUR_OPERATOR_PRIVATE_KEY"
 
    # API endpoints
    HASHIO_API_ENDPOINT="https://testnet.hashio.io/api"
+   # TODO: Update or generalize for EVM
    MIRROR_NODE_TESTNET="https://testnet.mirrornode.hedera.com/api/v1"
+   # TODO: Update or generalize for EVM
    MIRROR_NODE_MAINNET="https://mainnet-public.mirrornode.hedera.com/api/v1"
 
    # Optional variables
+   # TODO: Update for generic EVM
    HEDERA_TEST_ACCOUNT_ADDRESS="0xYOUR_TEST_ACCOUNT_ADDRESS"
    GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
    ```

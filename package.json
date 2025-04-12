@@ -1,7 +1,7 @@
 {
   "name": "karibu",
   "version": "1.0.0",
-  "description": "Smart Contract Analyzer and Tester for Hedera",
+  "description": "Smart Contract Analyzer and Tester for EVM Chains",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -11,9 +11,8 @@
     "clean": "rm -rf app/api/handle-large-contracts"
   },
   "keywords": [
-    "hedera",
-    "smart-contracts",
-    "solidity",
+    "evm",
+    "smart contracts",
     "blockchain"
   ],
   "author": "",

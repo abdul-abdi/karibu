@@ -4,7 +4,7 @@ import { formatToEvmAddress } from '../../utils/contract-utils';
 
 /**
  * API route handler to fetch all contracts deployed by a specific wallet address
- * Uses Hedera Mirror Node API to find all contracts connected to the wallet
+ * Uses a blockchain explorer API (currently Hedera Mirror Node) to find all contracts connected to the wallet
  */
 export async function GET(request: NextRequest) {
   try {
@@ -46,9 +46,9 @@ export async function GET(request: NextRequest) {
           contract_id: '0.0.3000001',
           evm_address: '0x0000000000000000000000000000000000000301',
           created_timestamp: '1686249550.123456789',
-          memo: 'HederaToken',
+          memo: 'EVMCoin',
           transaction_id: '0.0.3@1686249550.123456789',
-          name: 'Hedera Token',
+          name: 'EVM Coin',
           runtime_bytecode: '18160ddd70a08231', // Contains ERC20 function signatures
           admin_key: {
             key: 'sample_key_data',
@@ -61,9 +61,9 @@ export async function GET(request: NextRequest) {
           contract_id: '0.0.3000002',
           evm_address: '0x0000000000000000000000000000000000000302',
           created_timestamp: '1687150660.987654321',
-          memo: 'HederaNFT Collection',
+          memo: 'EVMCoin',
           transaction_id: '0.0.3@1687150660.987654321',
-          name: 'Hedera NFT Collection',
+          name: 'EVM Coin',
           runtime_bytecode: '6352211ec87b56dd', // Contains ERC721 function signatures
           admin_key: {
             key: 'sample_key_data',
@@ -76,9 +76,9 @@ export async function GET(request: NextRequest) {
           contract_id: '0.0.3000003',
           evm_address: '0x0000000000000000000000000000000000000303',
           created_timestamp: '1688261770.246813579',
-          memo: 'HederaGovernance',
+          memo: 'EVMCoin',
           transaction_id: '0.0.3@1688261770.246813579',
-          name: 'Hedera Governance',
+          name: 'EVM Coin',
           runtime_bytecode: 'proposal', // Contains governance keyword
           admin_key: {
             key: 'sample_key_data',

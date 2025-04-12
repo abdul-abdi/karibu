@@ -75,7 +75,7 @@ Karibu includes several built-in security features to protect users:
 | Feature | Description |
 |---------|-------------|
 | **Contract Analysis** | Automated security checks scan for common vulnerabilities |
-| **Testnet-Only Operations** | All deployments are limited to Hedera Testnet |
+| **Testnet-Only Operations** | All deployments are limited to supported Testnets |
 | **No Wallet Requirements** | No private keys are required from users |
 | **Server-Side Signing** | All blockchain transactions are signed server-side |
 

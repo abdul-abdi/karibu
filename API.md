@@ -135,7 +135,7 @@ Analyzes Solidity code for security issues and optimization opportunities.
 
 #### `POST /api/deploy`
 
-Deploys a compiled smart contract to Hedera Testnet.
+Deploys a compiled smart contract to a supported Testnet.
 
 **Request Body:**
 
@@ -143,7 +143,7 @@ Deploys a compiled smart contract to Hedera Testnet.
 {
   "bytecode": "0x608060405234801561001057600080fd5b5060...",
   "abi": [...],
-  "constructorArgs": ["Hello, Hedera!"]
+  "constructorArgs": ["Hello, EVM!"]
 }
 ```
 
@@ -180,7 +180,7 @@ Calls a read function on a deployed contract.
 ```json
 {
   "success": true,
-  "result": "Hello, Hedera!"
+  "result": "Hello, EVM!"
 }
 ```
 
@@ -262,7 +262,7 @@ Common error codes:
 - `EXECUTION_ERROR`: Error during contract function execution
 - `CONTRACT_NOT_FOUND`: Contract address not found
 - `INVALID_ARGS`: Invalid function arguments
-- `NETWORK_ERROR`: Error connecting to Hedera network
+- `NETWORK_ERROR`: Error connecting to the blockchain network
 
 ## Rate Limiting
 

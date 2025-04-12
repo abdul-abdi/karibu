@@ -126,7 +126,7 @@ function DeploymentProgress({ stage, progress, error }: {
     { id: 'prepare', label: 'Preparing Contract' },
     { id: 'link', label: 'Linking Libraries' },
     { id: 'compile', label: 'Final Compilation' },
-    { id: 'deploy', label: 'Deploying to Hedera' },
+    { id: 'deploy', label: 'Deploying to Testnet' },
     { id: 'confirm', label: 'Confirming Transaction' },
     { id: 'complete', label: 'Deployment Complete' }
   ];

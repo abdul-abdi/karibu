@@ -31,7 +31,7 @@ const templates = [
     category: 'tokens',
     title: 'Basic ERC20 Token',
     description: 'A standard ERC20 token implementation with minting capabilities.',
-    fullDescription: `This template provides a complete implementation of the ERC20 standard for fungible tokens on the Hedera network. 
+    fullDescription: `This template provides a complete implementation of the ERC20 standard for fungible tokens on EVM-compatible networks. 
     
     It allows you to create your own cryptocurrency with all the standard functions like transfers, allowances, and minting. The contract owner has special privileges to mint new tokens, making it ideal for projects that need controlled token issuance.
     
@@ -123,7 +123,7 @@ contract CappedToken is ERC20Capped, Ownable {
     category: 'nfts',
     title: 'Basic NFT Collection',
     description: 'A standard ERC721 NFT collection with minting functionality.',
-    fullDescription: `This template provides everything you need to create your own NFT collection on the Hedera network. It implements the ERC721 standard for non-fungible tokens with metadata support.
+    fullDescription: `This template provides everything you need to create your own NFT collection on EVM-compatible networks. It implements the ERC721 standard for non-fungible tokens with metadata support.
     
     Each token in your collection can have unique properties stored as metadata, accessed through a URI. This makes it perfect for digital art, collectibles, or any application where each token needs distinct characteristics.
     
@@ -674,7 +674,7 @@ export default function TemplatesPage() {
               Jumpstart your development with pre-built smart contract templates
             </p>
             <p className="text-md text-muted-foreground mb-8 max-w-3xl mx-auto">
-              Each template is thoroughly tested, follows security best practices, and can be deployed directly to the Hedera network. 
+              Each template is thoroughly tested, follows security best practices, and can be deployed directly to supported EVM networks. 
               Select a template category below to explore options.
             </p>
           </motion.div>

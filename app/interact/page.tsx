@@ -108,7 +108,7 @@ export default function InteractPage() {
               Interact With Smart Contracts
             </h1>
             <p className="text-xl text-foreground/80 mb-8">
-              Connect with deployed contracts on Hedera network and execute functions with real-time feedback
+              Connect with deployed contracts on supported networks and execute functions with real-time feedback
             </p>
           </motion.div>
         </div>
@@ -137,11 +137,11 @@ export default function InteractPage() {
                       value={contractAddress}
                       onChange={(e) => {
                         const input = e.target.value.trim();
-                        // Basic validation for Hedera ID format or EVM address
-                        const isValidHederaId = /^\d+(\.\d+){0,2}$/.test(input);
+                        // Basic validation for Contract ID format or EVM address
+                        const isValidContractId = /^\d+(\.\d+){0,2}$/.test(input);
                         const isValidEvmAddress = /^(0x)?[0-9a-fA-F]{40}$/.test(input);
                         
-                        if (input === '' || isValidHederaId || isValidEvmAddress) {
+                        if (input === '' || isValidContractId || isValidEvmAddress) {
                           setContractAddress(input);
                         }
                       }}
@@ -153,17 +153,17 @@ export default function InteractPage() {
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Enter the Hedera contract ID (0.0.XXXXX) or Solidity address (0x...)
+                    Enter the contract ID (e.g., 0.0.XXXXX) or EVM address (0x...)
                   </p>
                   {contractAddress && !/^(\d+(\.\d+){0,2}|(0x)?[0-9a-fA-F]{40})$/.test(contractAddress) && (
                     <p className="text-xs text-red-500 mt-1">
-                      Please enter a valid Hedera contract ID or EVM address format
+                      Please enter a valid Contract ID or EVM address format
                     </p>
                   )}
                   <div className="mt-2 text-xs text-muted-foreground border border-muted-foreground/20 rounded-md p-2 bg-muted/20">
                     <p className="font-medium mb-1">Supported formats:</p>
                     <ul className="list-disc list-inside space-y-0.5">
-                      <li>Hedera Contract ID: <span className="font-mono">0.0.XXXXX</span></li>
+                      <li>Contract ID: <span className="font-mono">0.0.XXXXX</span> (Example format)</li>
                       <li>EVM Address: <span className="font-mono">0xabc...123</span></li>
                       <li>Numeric ID: <span className="font-mono">XXXXX</span> (converted to 0.0.XXXXX)</li>
                     </ul>
@@ -227,7 +227,7 @@ export default function InteractPage() {
               {
                 icon: <Zap className="h-5 w-5" />,
                 title: "Fast Transaction Processing",
-                description: "Transactions process in seconds on the Hedera network"
+                description: "Transactions process quickly on the supported network"
               },
               {
                 icon: <RotateCw className="h-5 w-5" />,
@@ -286,7 +286,7 @@ export default function InteractPage() {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground mt-3">
-                These are working example contracts on Hedera testnet - the two examples above are actually the same contract in different formats
+                These are working example contracts on the currently supported testnet - the two examples above might represent the same contract in different formats
               </p>
             </div>
           </motion.div>

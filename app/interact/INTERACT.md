@@ -2,17 +2,17 @@
 
 ## Overview
 
-The Karibu Interact feature provides a comprehensive interface for connecting with and testing deployed smart contracts on the Hedera Testnet. This guide explains how to effectively use all interaction capabilities to explore, analyze, and interact with any smart contract deployed on Hedera.
+The Karibu Interact feature provides a comprehensive interface for connecting with and testing deployed smart contracts on supported Testnets (currently Hedera Testnet). This guide explains how to effectively use all interaction capabilities to explore, analyze, and interact with any smart contract deployed on these networks.
 
 ## 🚀 Quick Start
 
 1. Navigate to the Interact page in Karibu
 2. Enter your contract address (supports multiple formats):
-   - Hedera format: `0.0.1234567`
+   - Contract ID format (e.g., Hedera): `0.0.1234567`
    - EVM format: `0x742f4f7549B39666d7A55b3d5316e7e5dcC86944`
    - Numeric format: `1234567`
 3. The system will automatically:
-   - Verify the contract's existence on Hedera Testnet
+   - Verify the contract's existence on the connected Testnet
    - Analyze the contract's bytecode to identify functions
    - Generate an interactive interface for all contract functions
    - Display contract metadata and state information
@@ -20,7 +20,7 @@ The Karibu Interact feature provides a comprehensive interface for connecting wi
 ## 📋 Key Features
 
 ### Smart Contract Discovery
-- **Multi-format Address Support**: Enter contract addresses in any format (Hedera, EVM, or numeric)
+- **Multi-format Address Support**: Enter contract addresses in supported formats (e.g., EVM, Hedera ID)
 - **Automatic Verification**: Instant validation of contract existence on the network
 - **Bytecode Analysis**: Intelligent function detection even without ABI
 - **Source Code Integration**: Automatic fetching of verified source code when available
@@ -54,14 +54,14 @@ The Karibu Interact feature provides a comprehensive interface for connecting wi
 ```
 // Example contract address formats - all supported
 0x742f4f7549B39666d7A55b3d5316e7e5dcC86944  // EVM format
-0.0.1234567                                  // Hedera format
+0.0.1234567                                  // Example Contract ID (Hedera)
 1234567                                      // Numeric format
 ```
 
 - Enter your contract address in the search bar at the top of the Interact page
 - The system automatically validates the address and loads contract data
 - View comprehensive contract details in the header section:
-  - Contract address (in both EVM and Hedera formats)
+  - Contract address (in supported formats like EVM or Hedera ID)
   - Creation date and transaction hash
   - Contract balance
   - Creator address
@@ -148,10 +148,10 @@ The interface automatically categorizes and displays all contract functions:
 ### Common Issues and Solutions
 
 1. **Contract Address Not Found**
-   - Verify the address format is correct (EVM or Hedera format)
-   - Confirm you're connected to Hedera Testnet in your wallet
+   - Verify the address format is correct (e.g., EVM address or Contract ID)
+   - Confirm you're connected to the correct Testnet in your wallet (if applicable)
    - Check if the contract is actually deployed using HashScan
-   - Try alternative address formats (convert between EVM and Hedera format)
+   - Try alternative address formats (e.g., convert between EVM address and Contract ID if applicable)
 
 2. **Function Execution Failures**
    - Review parameter types and ensure they match the function signature
@@ -169,7 +169,7 @@ The interface automatically categorizes and displays all contract functions:
 
 4. **Wallet Connection Problems**
    - Ensure MetaMask is installed and unlocked
-   - Verify you're connected to Hedera Testnet in MetaMask
+   - Verify you're connected to the correct Testnet in your wallet (if applicable)
    - Try refreshing the page and reconnecting
    - Check for browser console errors
    - Clear browser cache if persistent issues occur
@@ -301,7 +301,7 @@ const [reserve0, reserve1] = await pair.getReserves();
 
 ## 🔗 Related Resources
 
-- [Hedera Smart Contract Documentation](https://docs.hedera.com/hedera/tutorials/smart-contracts)
+- [Blockchain Smart Contract Documentation](https://ethereum.org/en/developers/docs/smart-contracts/)
 - [Solidity Documentation](https://docs.soliditylang.org/)
 - [HashScan Explorer](https://hashscan.io/testnet)
 - [Hedera JSON-RPC Relay](https://github.com/hashgraph/hedera-json-rpc-relay)

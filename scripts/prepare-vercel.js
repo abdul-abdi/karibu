@@ -59,16 +59,20 @@ if (!fs.existsSync('.env.production')) {
   const envSample = `# Karibu Production Environment Variables
 # Replace these placeholders with your actual values in Vercel
 
-# Required Hedera account information
+# Required blockchain account information (currently Hedera)
+# TODO: Update for generic EVM
 HEDERA_OPERATOR_ID="0.0.YOUR_OPERATOR_ID"
 HEDERA_OPERATOR_KEY="YOUR_OPERATOR_PRIVATE_KEY"
 
 # API endpoints
 HASHIO_API_ENDPOINT="https://testnet.hashio.io/api"
+# TODO: Update or generalize for EVM
 MIRROR_NODE_TESTNET="https://testnet.mirrornode.hedera.com/api/v1"
+# TODO: Update or generalize for EVM
 MIRROR_NODE_MAINNET="https://mainnet-public.mirrornode.hedera.com/api/v1"
 
 # Optional variables
+# TODO: Update for generic EVM
 HEDERA_TEST_ACCOUNT_ADDRESS="0xYOUR_TEST_ACCOUNT_ADDRESS"
 GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
 `;

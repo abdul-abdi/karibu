@@ -85,7 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release of Karibu
 - Basic smart contract creation and editing
-- Contract deployment to Hedera Testnet
+- Contract deployment to Testnet
 - Simple contract interaction interface
 - Karibu AI Assistant integration
 - Learning resources and documentation
@@ -109,7 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Alpha release
 - Basic smart contract creation
 - Simple contract interaction
-- Preliminary Hedera integration
+- Preliminary Blockchain integration (via Hedera)
 
 ### Known Issues
 - Limited security analysis

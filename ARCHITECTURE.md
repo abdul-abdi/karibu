@@ -4,7 +4,7 @@ This document outlines the high-level architecture of the Karibu platform, detai
 
 ## System Overview
 
-Karibu is a Next.js application that provides a comprehensive platform for smart contract development, analysis, deployment, and interaction on the Hedera network.
+Karibu is a Next.js application that provides a comprehensive platform for smart contract development, analysis, deployment, and interaction on supported EVM networks.
 
 ### Core Components
 
@@ -66,11 +66,11 @@ The Multi-File IDE is built around a virtual file system that allows developers 
 - **Security Analysis**: Static analysis of contract code
 - **Validation**: Syntax and semantic validation
 
-### 3. Hedera Integration
+### 3. Blockchain Integration (Initially Hedera)
 
 #### Components:
 
-- **Deployment Service**: Smart contract deployment to Hedera Testnet
+- **Deployment Service**: Smart contract deployment to supported Testnets
 - **Mirror Node Integration**: Interaction with deployed contracts
 - **Transaction Handling**: Creation and submission of transactions
 
@@ -91,7 +91,7 @@ The Multi-File IDE is built around a virtual file system that allows developers 
    - Compilation artifacts are generated (bytecode, ABI)
 
 2. **Contract Deployment**:
-   - Bytecode is deployed to Hedera Testnet
+   - Bytecode is deployed to a supported Testnet
    - Transaction receipt is processed
    - Contract address is returned and stored
 

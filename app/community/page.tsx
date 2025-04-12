@@ -51,7 +51,7 @@ export default function CommunityPage() {
               Community Hub
             </h1>
             <p className="text-xl text-foreground/80 mb-8">
-              Join our community of developers building on Hedera with Karibu
+              Join our community of developers building on EVM chains with Karibu
             </p>
           </motion.div>
         </div>
@@ -110,15 +110,6 @@ export default function CommunityPage() {
                   >
                     <Github className="h-4 w-4 mr-2" />
                     <span>GitHub</span>
-                  </a>
-                  <a 
-                    href="https://discord.com/invite/hedera" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center p-2 bg-background/80 rounded-md hover:bg-primary/5 transition-colors"
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    <span>Hedera Discord</span>
                   </a>
                 </div>
               </div>

@@ -142,7 +142,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p className="text-xs">Deploy your compiled contract to the Hedera Testnet</p>
+              <p className="text-xs">Deploy your compiled contract to a supported Testnet</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -636,7 +636,7 @@ export const IDEDetailsPanel: React.FC<{ mode: 'simple' | 'advanced' }> = ({ mod
         },
         {
           name: "One-Click Deployment",
-          description: "Deploy directly to Hedera testnet without configuration complexity"
+          description: "Deploy directly to a supported testnet without configuration complexity"
         }
       ]
     },
@@ -657,7 +657,7 @@ export const IDEDetailsPanel: React.FC<{ mode: 'simple' | 'advanced' }> = ({ mod
         },
         {
           name: "Step 4: Deploy to testnet",
-          description: "Push your contract to Hedera testnet with a single click"
+          description: "Push your contract to a supported testnet with a single click"
         },
         {
           name: "Step 5: Interact with your contract",

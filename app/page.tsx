@@ -123,7 +123,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               A comprehensive platform for blockchain developers to build, analyze, deploy, and interact with 
-              smart contracts on Hedera. From security analysis to one-click deployment, Karibu eliminates 
+              smart contracts on EVM chains. From security analysis to one-click deployment, Karibu eliminates 
               complexity—no wallet setup, no gas fees, just pure development focus.
             </motion.p>
             
@@ -135,7 +135,7 @@ export default function Home() {
             >
               <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">Solidity Analysis</span>
               <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-sm font-medium">Zero Setup</span>
-              <span className="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-500 text-sm font-medium">Hedera Testnet</span>
+              <span className="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-500 text-sm font-medium">EVM Testnet</span>
               <span className="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-sm font-medium">Real-time Testing</span>
               <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-500 text-sm font-medium">AI Assistant</span>
             </motion.div>
@@ -290,7 +290,7 @@ export default function Home() {
               {
                 icon: <Zap className="h-6 w-6" />,
                 title: "One-Click Deployment",
-                description: "Deploy to Hedera Testnet with a single click - no wallet configuration required",
+                description: "Deploy to supported Testnets with a single click - no wallet configuration required",
                 color: "from-purple-500/20 to-pink-500/20"
               },
               {
@@ -625,9 +625,9 @@ export default function Home() {
                 </motion.div>
                 <div className="bg-background rounded-2xl p-8 border border-border/50 shadow-lg relative overflow-hidden group hover:border-indigo-500/50 transition-colors duration-300">
                   <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-                  <h3 className="text-2xl font-semibold mb-3 text-indigo-500">3. Deploy to Hedera</h3>
+                  <h3 className="text-2xl font-semibold mb-3 text-indigo-500">3. Deploy to Testnet</h3>
                   <p className="text-foreground/70 mb-4">
-                    With a single click, deploy your contract to the Hedera Testnet. No wallet configuration or HBAR required – Karibu handles all the deployment complexity behind the scenes. You can provide constructor arguments and customize gas settings.
+                    With a single click, deploy your contract to a supported Testnet. No wallet configuration required – Karibu handles all the deployment complexity behind the scenes. You can provide constructor arguments and customize gas settings.
                   </p>
                   <div className="flex flex-wrap gap-2 text-xs">
                     <span className="px-2 py-1 rounded-full bg-indigo-500/10 text-indigo-500">One-Click Deploy</span>
@@ -660,7 +660,7 @@ export default function Home() {
                       viewport={{ once: true }}
                       transition={{ duration: 0.3, delay: 0.5 }}
                     >
-                      <p>{`> Connecting to Hedera Testnet...`}</p>
+                      <p>{`> Connecting to Testnet...`}</p>
                     </motion.div>
                     <motion.div 
                       className="text-foreground/70"
@@ -836,7 +836,7 @@ export default function Home() {
             </motion.div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Find Your Path</h2>
             <p className="text-lg text-foreground/70 max-w-3xl mx-auto">
-              Choose the perfect starting point for your smart contract journey on Hedera
+              Choose the perfect starting point for your smart contract journey on EVM chains
             </p>
           </motion.div>
 
@@ -858,7 +858,7 @@ export default function Home() {
                 ],
                 capabilities: [
                   "Write and compile Solidity contracts",
-                  "Deploy to Hedera Testnet instantly",
+                  "Deploy to Testnet instantly",
                   "Get instant security feedback",
                   "Test with sample data",
                   "Generate and download ABI"
@@ -866,7 +866,7 @@ export default function Home() {
               },
               {
                 title: "Interact with Contracts",
-                description: "Connect to and interact with existing smart contracts on the Hedera network",
+                description: "Connect to and interact with existing smart contracts on supported EVM networks",
                 icon: <ExternalLink className="h-6 w-6" />,
                 color: "from-purple-500/20 to-pink-500/20",
                 link: "/interact",
@@ -888,7 +888,7 @@ export default function Home() {
               },
               {
                 title: "Check Wallet Contracts",
-                description: "View and analyze all contracts deployed by any wallet address on Hedera",
+                description: "View and analyze all contracts deployed by any wallet address on supported networks",
                 icon: <Wallet className="h-6 w-6" />,
                 color: "from-green-500/20 to-emerald-500/20",
                 link: "/wallet",
@@ -1078,7 +1078,7 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
-                Learn about smart contracts, test your deployed solutions without integration complexity, and analyze existing contracts on the Hedera blockchain - all in one accessible platform.
+                Learn about smart contracts, test your deployed solutions without integration complexity, and analyze existing contracts on supported blockchains - all in one accessible platform.
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

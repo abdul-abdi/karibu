@@ -1,7 +1,7 @@
 {
   "name": "Karibu",
   "short_name": "Karibu",
-  "description": "Analyze, deploy, and interact with smart contracts on Hedera with zero setup and no wallet required.",
+  "description": "Analyze, deploy, and interact with smart contracts on EVM chains with zero setup and no wallet required.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

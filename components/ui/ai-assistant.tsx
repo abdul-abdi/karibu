@@ -30,7 +30,7 @@ I'm your **Karibu** assistant, your friendly blockchain buddy! 🤖💼
 I can help with:
 - 🧩 Blockchain concepts & smart contract puzzles
 - 👨‍💻 Solidity coding questions (I love good code!)
-- 🌐 Hedera Testnet tips & tricks
+- 🌐 EVM Testnet tips & tricks
 - 🔍 Karibu features & how to get the most out of them
 
 Think of me as your personal dev sidekick! Just a message away whenever you need smart contract wisdom. 
@@ -56,7 +56,7 @@ I'm all ready to help with your blockchain journey, but it looks like my connect
 - Double-check for typos (computers are picky, aren't they? 😉)
 - Make sure to restart your Next.js server afterward
 
-I'm super excited to help with all your Hedera and smart contract questions as soon as we're connected! 🚀`,
+I'm super excited to help with all your EVM and smart contract questions as soon as we're connected! 🚀`,
   timestamp: new Date(),
 };
 
@@ -129,7 +129,7 @@ export function AIAssistant() {
           {
             parts: [
               {
-                text: `You are a friendly, enthusiastic, and helpful AI assistant specializing in Hedera blockchain technology and smart contracts.
+                text: `You are a friendly, enthusiastic, and helpful AI assistant specializing in blockchain technology, EVM, and smart contracts.
                 Your name is Karibu.
                 
                 PERSONALITY:
@@ -141,7 +141,7 @@ export function AIAssistant() {
                 
                 CONTEXT ABOUT KARIBU PLATFORM:
                 - Karibu is a platform for creating, analyzing, deploying, and interacting with smart contracts
-                - Karibu currently only supports Hedera Testnet (mainnet and other chains planned for 2025)
+                - Karibu currently only supports certain EVM Testnets (mainnet and other chains planned for 2025)
                 - Features include: code creation, deployment, analysis, interaction, and learning resources
                 - All operations are zero-setup with no wallet required
                 - Users can deploy contracts with one click and interact with them in real-time

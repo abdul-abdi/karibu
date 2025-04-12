@@ -1,10 +1,10 @@
 # Karibu
 
-## A Smart Contract Analyzer for Hedera Testnet
+## A Smart Contract Analyzer for EVM Chains
 
 <div align="center">
   <img src="public/favicon.svg" alt="Karibu Logo" width="150" height="auto" />
-  <p><strong>Smart Contract Analyzer for Hedera Testnet</strong></p>
+  <p><strong>Smart Contract Analyzer for EVM-Compatible Testnets</strong></p>
   <div>
     <a href="#-overview">Overview</a> •
     <a href="#-key-features">Features</a> •
@@ -17,18 +17,18 @@
 
 ## 📋 Overview
 
-Karibu is an all-in-one platform for blockchain developers to build, analyze, deploy, and interact with smart contracts on the Hedera Testnet. Our platform streamlines the development process with zero setup required - no wallet configuration needed. Karibu combines powerful development tools with an integrated AI assistant to guide you through the blockchain development journey.
+Karibu is an all-in-one platform for blockchain developers to build, analyze, deploy, and interact with smart contracts on EVM-compatible testnets. Our platform streamlines the development process with zero setup required - no wallet configuration needed. Karibu combines powerful development tools with an integrated AI assistant to help you write secure and efficient code.
 
-## 🔑 Key Features
+## �� Key Features
 
 - 🔍 **Smart Contract Analysis** - Instantly analyze Solidity code for insights and security considerations
-- 🚀 **One-Click Deployment** - Deploy to Hedera Testnet without wallet configuration or manual gas settings
+- 🚀 **One-Click Deployment** - Deploy to EVM testnets without wallet configuration or manual gas settings
 - 🔒 **Security-First Approach** - Automated security checks and best practice suggestions
 - ⚡ **Universal Contract Interaction** - Dynamically interact with any contract type using intelligent interface detection
 - 🔮 **Advanced ABI Discovery** - Accurate function detection through bytecode analysis for any smart contract
 - 📊 **Live State Visualization** - Real-time view of contract state variables and storage
 - 📚 **Learning Resources** - Comprehensive guides on smart contract development
-- 🧠 **AI Assistant** - Get instant answers about blockchain concepts, Solidity, and Hedera
+- 🧠 **AI Assistant** - Get instant answers about blockchain concepts, Solidity, and EVM development
 - 🔌 **No External Dependencies** - Everything runs in-browser with no wallet requirements
 - 📂 **Multi-File IDE** - Develop complex contract systems with multiple files and dependencies
 - 📦 **External Library Support** - Seamless integration with popular libraries like OpenZeppelin
@@ -87,7 +87,7 @@ Karibu provides an end-to-end workflow for smart contract development:
 
 1. **Create or Upload** - Write Solidity code in our editor or upload existing files
 2. **Compile & Analyze** - Automated compilation and security analysis
-3. **Deploy to Hedera** - One-click deployment to Hedera Testnet
+3. **Deploy to Testnet** - One-click deployment to supported testnets
 4. **Interact & Verify** - Call functions and view results in real-time with our universal interface
 
 ## 📖 Usage Guide
@@ -192,7 +192,7 @@ Karibu is in active development with the following roadmap:
 - Dynamic Contract Interaction (supports any contract type)
 - Advanced ABI Discovery through bytecode analysis
 - Live Contract State Visualization
-- Hedera Testnet Support
+- EVM Testnet Support (Initial support via Hedera Testnet)
 - Learning Resources
 - Karibu AI Assistant
 - Comprehensive Template System with categories and detailed documentation
@@ -253,13 +253,14 @@ This project is licensed under the [ISC License](LICENSE)
 
 ## 📚 Additional Resources
 
-- [Hedera Documentation](https://docs.hedera.com/)
+- [Ethereum Development Documentation](https://ethereum.org/en/developers/docs/)
 - [Solidity Documentation](https://docs.soliditylang.org/)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Gemini API Documentation](https://ai.google.dev/docs)
 - [OpenZeppelin Documentation](https://docs.openzeppelin.com/) - For library integration
+- Blockchain infrastructure providers
 
-## 🙏 Acknowledgements
+## �� Acknowledgements
 
 - [Hedera](https://hedera.com/) for their blockchain technology
 - [OpenZeppelin](https://openzeppelin.com/) for secure contract templates
