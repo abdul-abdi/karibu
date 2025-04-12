@@ -28,7 +28,7 @@ const Footer = () => {
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 hover:text-primary transition-colors"
-              href="https://github.com/abdul-abdi/smartscope"
+              href="https://github.com/abdul-abdi/karibu"
             >
               <Github className="h-4 w-4" />
               <span>GitHub</span>

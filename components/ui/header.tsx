@@ -191,7 +191,7 @@ export default function Header() {
             <ThemeSwitcher />
             
             <a
-              href="https://github.com/abdul-abdi/smartscope"
+              href="https://github.com/abdul-abdi/karibu"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors"

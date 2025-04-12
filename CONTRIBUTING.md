@@ -20,8 +20,8 @@ We expect all contributors to follow our [Code of Conduct](CODE_OF_CONDUCT.md). 
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/smartscope.git`
-3. Navigate to the project directory: `cd smartscope`
+2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/karibu.git`
+3. Navigate to the project directory: `cd karibu`
 4. Install dependencies: `npm install` or `yarn`
 5. Create a new branch for your feature: `git checkout -b feature/your-feature-name`
 
@@ -34,7 +34,7 @@ We expect all contributors to follow our [Code of Conduct](CODE_OF_CONDUCT.md). 
 ## Project Structure
 
 ```
-smartscope/
+karibu/
 ├── app/                  # Next.js app directory
 │   ├── api/              # API routes for contract interactions
 │   ├── create/           # Contract creation and Multi-File IDE

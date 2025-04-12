@@ -103,7 +103,7 @@ export default function CommunityPage() {
                 </p>
                 <div className="space-y-3">
                   <a 
-                    href="https://github.com/abdul-abdi/smartscope" 
+                    href="https://github.com/abdul-abdi/karibu" 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center p-2 bg-background/80 rounded-md hover:bg-primary/5 transition-colors"

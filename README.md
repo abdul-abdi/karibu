@@ -46,8 +46,8 @@ SmartScope is an all-in-one platform for blockchain developers to build, analyze
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/abdul-abdi/smartscope.git
-   cd smartscope
+   git clone https://github.com/abdul-abdi/karibu.git
+   cd karibu
    ```
 
 2. Install dependencies
@@ -165,7 +165,7 @@ Comprehensive documentation is available in the following files:
 ## 🏗️ Project Structure
 
 ```
-smartscope/
+karibu/
 ├── app/                  # Next.js app directory
 │   ├── api/              # API routes for contract interactions
 │   ├── create/           # Contract creation pages and Multi-File IDE
@@ -245,7 +245,7 @@ For deployment instructions, please refer to our [Deployment Guide](DEPLOYMENT.m
 
 The application is set up for easy deployment on Vercel:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fabdul-abdi%2Fsmartscope)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fabdul-abdi%2Fkaribu)
 
 ## 📄 License
 
