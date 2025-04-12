@@ -1,9 +1,9 @@
-# SmartScope
+# Karibu
 
 ## A Smart Contract Analyzer for Hedera Testnet
 
 <div align="center">
-  <img src="public/favicon.svg" alt="SmartScope Logo" width="150" height="auto" />
+  <img src="public/favicon.svg" alt="Karibu Logo" width="150" height="auto" />
   <p><strong>Smart Contract Analyzer for Hedera Testnet</strong></p>
   <div>
     <a href="#-overview">Overview</a> •
@@ -17,7 +17,7 @@
 
 ## 📋 Overview
 
-SmartScope is an all-in-one platform for blockchain developers to build, analyze, deploy, and interact with smart contracts on the Hedera Testnet. Our platform streamlines the development process with zero setup required - no wallet configuration needed. SmartScope combines powerful development tools with an integrated AI assistant to guide you through the blockchain development journey.
+Karibu is an all-in-one platform for blockchain developers to build, analyze, deploy, and interact with smart contracts on the Hedera Testnet. Our platform streamlines the development process with zero setup required - no wallet configuration needed. Karibu combines powerful development tools with an integrated AI assistant to guide you through the blockchain development journey.
 
 ## 🔑 Key Features
 
@@ -83,7 +83,7 @@ SmartScope is an all-in-one platform for blockchain developers to build, analyze
 
 ## 🔧 Application Workflow
 
-SmartScope provides an end-to-end workflow for smart contract development:
+Karibu provides an end-to-end workflow for smart contract development:
 
 1. **Create or Upload** - Write Solidity code in our editor or upload existing files
 2. **Compile & Analyze** - Automated compilation and security analysis
@@ -148,7 +148,7 @@ SmartScope provides an end-to-end workflow for smart contract development:
 ### Using the AI Assistant
 
 1. Click the AI Assistant chat button in the bottom-right corner
-2. Ask questions about blockchain concepts, Solidity, or how to use SmartScope
+2. Ask questions about blockchain concepts, Solidity, or how to use Karibu
 3. Get instant, contextual help while you develop
 
 ## 📄 Documentation
@@ -183,7 +183,7 @@ karibu/
 
 ## 🗺️ Roadmap
 
-SmartScope is in active development with the following roadmap:
+Karibu is in active development with the following roadmap:
 
 ### Current Features
 - Smart Contract Creation and Analysis
@@ -194,7 +194,7 @@ SmartScope is in active development with the following roadmap:
 - Live Contract State Visualization
 - Hedera Testnet Support
 - Learning Resources
-- SmartScope AI Assistant
+- Karibu AI Assistant
 - Comprehensive Template System with categories and detailed documentation
 - Community and Learning Pages with integrated navigation
 
@@ -210,7 +210,7 @@ SmartScope is in active development with the following roadmap:
 
 ## 🧠 AI Assistant Setup
 
-The SmartScope AI Assistant requires a Gemini API key to function:
+The Karibu AI Assistant requires a Gemini API key to function:
 
 1. Get a Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Add it to your `.env.local` file:
@@ -221,7 +221,7 @@ The SmartScope AI Assistant requires a Gemini API key to function:
 
 ## 🤝 Contributing
 
-We welcome contributions to SmartScope! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to get started.
+We welcome contributions to Karibu! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to get started.
 
 ## 📦 Building for Production
 

@@ -1,6 +1,6 @@
-# Contributing to SmartScope
+# Contributing to Karibu
 
-Thank you for your interest in contributing to SmartScope! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to Karibu! This document provides guidelines and instructions for contributing to the project.
 
 ## Table of Contents
 
@@ -111,4 +111,4 @@ When working with external library functionality:
 - Test with various contract types and complexity levels
 - For Multi-File IDE features, test with complex imports and file structures
 
-Thank you for contributing to making SmartScope better! 
+Thank you for contributing to making Karibu better! 
