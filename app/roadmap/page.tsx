@@ -2,371 +2,302 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Circle, Clock, Sparkles, Code, Shield, Zap, Users, Globe, Database, Lock, LineChart, MessageSquare, FileCode, BookOpen, Cpu, GitBranch, Bug, Rocket, Bot, ArrowRight, Braces, Star, Binoculars } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Sparkles, Code, Shield, Zap, Users, Globe, Database, Lock, LineChart, MessageSquare, FileCode, BookOpen, Cpu, GitBranch, Bug, Rocket, Bot, ArrowRight, Braces, Star, Binoculars, Construction, AlertTriangle, BrainCircuit, Lightbulb, Eye, Search, Edit, Wand2, TestTube, CloudUpload, Monitor, Network, Palette, Gamepad2, Target, Layers, Workflow, Microscope, Gauge, TrendingUp, Award, ShieldCheck, ArrowUpRight, Plug, Blocks, Headphones, UserCheck, Briefcase, Megaphone, Trophy, Gift, Coins, Timer, Webhook, Activity, BarChart3, PieChart, Settings, Wrench, Hammer, Crosshair, Radar, Compass, Map, Route, Calendar, Clock3, Hourglass } from 'lucide-react';
 
 const roadmapItems = [
   {
-    title: 'Current Features',
+    title: 'Production Ready Features',
     status: 'completed',
     items: [
       {
-        title: 'Smart Contract Creation',
-        description: 'Create and deploy smart contracts on Hedera network',
+        title: 'Smart Contract Creation & Development',
+        description: 'Full-featured IDE for creating and deploying smart contracts',
         icon: Code,
         details: [
-          'Solidity contract creation',
-          'Contract deployment to Hedera Testnet',
-          'Basic contract interaction'
+          'Simple and Advanced Multi-File IDE with syntax highlighting',
+          'Real-time compilation and validation',
+          'Deploy to Ethereum testnet and mainnet',
+          'Project templates (ERC20, NFT, DAO, DeFi)',
+          'OpenZeppelin library integration',
+          'Dependency management and resolution',
+          'Full-screen IDE mode with popup guides'
         ]
       },
       {
-        title: 'Contract Analysis',
-        description: 'Analyze existing smart contracts on Hedera',
-        icon: FileCode,
-        details: [
-          'Contract code analysis',
-          'Function discovery',
-          'Basic security checks'
-        ]
-      },
-      {
-        title: 'Learning Resources',
-        description: 'Comprehensive learning materials for smart contract development',
+        title: 'Comprehensive Learning Platform',
+        description: 'Educational resources and interactive tutorials',
         icon: BookOpen,
         details: [
-          'Smart contract basics',
-          'Solidity fundamentals',
-          'Hedera network overview'
+          'Smart contract development fundamentals',
+          'Solidity programming guide',
+          'Blockchain concepts and best practices',
+          'Security patterns and vulnerability prevention',
+          'Interactive code examples and exercises',
+          'Progressive difficulty levels'
+        ]
+      },
+      {
+        title: 'Template Gallery & Quick Start',
+        description: 'Professional contract templates with detailed documentation',
+        icon: Star,
+        details: [
+          'Categorized template library (DeFi, NFT, DAO, Tokens)',
+          'Detailed use cases and technical specifications',
+          'Difficulty indicators and feature tags',
+          'One-click template integration',
+          'Seamless workflow from browsing to development',
+          'Community-contributed templates'
         ]
       },
       {
         title: 'Karibu AI Assistant',
-        description: 'AI-powered chat assistant for blockchain and smart contract questions',
+        description: 'Intelligent blockchain and smart contract guidance',
         icon: Bot,
         details: [
-          'Instant blockchain knowledge',
-          'Smart contract guidance',
-          'Hedera-specific information',
-          'Zero-setup contextual help'
+          'Real-time code suggestions and explanations',
+          'Solidity and blockchain knowledge base',
+          'Smart contract security recommendations',
+          'Deployment and testing guidance',
+          'Error resolution and debugging help',
+          'Context-aware assistance throughout development'
         ]
       },
       {
-        title: 'Dynamic Contract Interaction',
-        description: 'Universal smart contract interaction framework',
-        icon: Braces,
-        details: [
-          'Contract-type agnostic interface',
-          'Automatic function discovery',
-          'Live contract state visualization',
-          'Improved React component architecture',
-          'Multi-format address support (Hedera, EVM, Numeric)'
-        ]
-      },
-      {
-        title: 'Advanced ABI Discovery',
-        description: 'Intelligent detection of contract interfaces',
-        icon: Binoculars,
-        details: [
-          'Bytecode-based function detection',
-          'Accurate function signature matching',
-          'Support for any contract type',
-          'Reliable state variable reading',
-          'Custom ABI management with upload/edit capabilities'
-        ]
-      },
-      {
-        title: 'Multi-File IDE',
-        description: 'Develop complex contract ecosystems with dependencies',
-        icon: GitBranch,
-        details: [
-          'Advanced file system organization',
-          'Project structure with folders and files',
-          'Tabbed interface for multi-file editing',
-          'Syntax highlighting and error detection',
-          'Code autocompletion and snippets',
-          'Real-time validation and linting'
-        ]
-      },
-      {
-        title: 'External Library Integration',
-        description: 'Seamless support for popular Solidity libraries',
-        icon: Cpu,
-        details: [
-          'OpenZeppelin library support',
-          'Automatic dependency resolution',
-          'External import handling',
-          'Version compatibility detection'
-        ]
-      },
-      {
-        title: 'Dependency Management',
-        description: 'Smart handling of project dependencies',
-        icon: Bug,
-        details: [
-          'Automatic resolution of imports',
-          'Circular dependency detection',
-          'Visual dependency graph',
-          'Smart compilation with dependency order'
-        ]
-      },
-      {
-        title: 'Project Templates',
-        description: 'Ready-to-use smart contract templates',
+        title: 'Advanced Code Editor',
+        description: 'Professional-grade development environment',
         icon: FileCode,
         details: [
-          'ERC20 token template',
-          'NFT (ERC721) contract template',
-          'DAO governance template',
-          'Crowdfunding campaign template'
+          'Syntax highlighting and error detection',
+          'Code autocompletion and snippets',
+          'Real-time linting and validation',
+          'Tabbed interface for multi-file projects',
+          'Project organization with folders',
+          'Import resolution and dependency tracking'
         ]
       },
       {
-        title: 'Enhanced Templates System',
-        description: 'Comprehensive template browser with detailed information',
-        icon: Star,
-        details: [
-          'Categorized template library',
-          'Detailed template descriptions and use cases',
-          'Technical specifications for each template',
-          'One-click template integration with IDE',
-          'Seamless workflow between browsing and development',
-          'Difficulty indicators and feature tags'
-        ]
-      },
-      {
-        title: 'Contract Verification',
-        description: 'Verify and validate smart contracts on the network',
-        icon: CheckCircle2,
-        details: [
-          'Source code verification',
-          'Bytecode matching',
-          'Verification status tracking',
-          'Public verification access'
-        ]
-      },
-      {
-        title: 'Advanced State Visualization',
-        description: 'Comprehensive contract state monitoring and inspection',
-        icon: Database,
-        details: [
-          'Storage slot inspection with decoded values',
-          'Real-time state change tracking',
-          'State comparison before/after transactions',
-          'Historical state value tracking',
-          'State data export capabilities'
-        ]
-      },
-      {
-        title: 'Event Monitoring System',
-        description: 'Track and analyze contract events with advanced filtering',
+        title: 'Deployment & Network Management',
+        description: 'Seamless contract deployment across networks',
         icon: Rocket,
         details: [
-          'Real-time event listening',
-          'Historical event data with parameter decoding',
-          'Event filtering by type and block range',
-          'Event-driven state updates',
-          'Chronological event timeline'
-        ]
-      },
-      {
-        title: 'Transaction Management',
-        description: 'Comprehensive transaction handling and analysis',
-        icon: Zap,
-        details: [
-          'Transaction history tracking',
-          'Transaction replay capabilities',
-          'Detailed transaction receipts',
-          'Gas usage analytics',
-          'Transaction status monitoring'
+          'One-click deployment to multiple networks',
+          'Automatic network detection and configuration',
+          'Transaction monitoring and confirmation',
+          'Gas estimation and optimization',
+          'Contract verification and publication',
+          'Deployment history and tracking'
         ]
       }
     ]
   },
   {
-    title: 'In Progress (Q2 2025)',
+    title: 'Under Active Development',
     status: 'current',
     items: [
       {
-        title: 'Smart Contract Decompiler',
-        description: 'Advanced tools to reverse-engineer contracts from bytecode',
-        icon: FileCode,
-        details: [
-          'Full decompilation from bytecode to Solidity',
-          'ABI-assisted reconstruction',
-          'Function signature matching',
-          'Source code structure recovery',
-          'Developer comments and documentation generation'
-        ]
-      },
-      {
-        title: 'Enhanced Contract Interaction UI',
-        description: 'Redesigned interface for seamless contract interaction',
+        title: 'Contract Interaction Interface',
+        description: 'Universal smart contract interaction and testing platform',
         icon: Zap,
         details: [
-          'Intuitive function organization',
-          'Real-time transaction updates',
-          'Interactive parameter input assistance',
-          'Visual state change tracking',
-          'Improved error handling and feedback'
+          'Dynamic ABI detection and parsing',
+          'Contract function discovery and visualization',
+          'Real-time contract state monitoring',
+          'Transaction execution with detailed feedback',
+          'Multi-network contract support',
+          'Recent contracts history and quick access'
         ]
       },
       {
-        title: 'One-Click Contract Verification',
-        description: 'Streamlined verification process for Hedera contracts',
-        icon: CheckCircle2,
+        title: 'Wallet Contract Explorer',
+        description: 'Comprehensive wallet analysis and contract discovery',
+        icon: Search,
         details: [
-          'Automated verification on Hedera Testnet',
-          'Source code and ABI matching',
-          'Compiler version detection',
-          'Optimization settings detection',
-          'Public verification badge and profile'
+          'Wallet address contract discovery',
+          'Contract type identification and classification',
+          'Deployment history and timeline',
+          'Contract interaction analysis',
+          'Cross-format address support (Hedera, EVM)',
+          'Advanced filtering and search capabilities'
         ]
       },
       {
-        title: 'User/Developer Mode Toggle',
-        description: 'Contextual interface adapting to user expertise level',
+        title: 'Community & Collaboration Hub',
+        description: 'Social features for developers and learners',
         icon: Users,
         details: [
-          'Simplified UI for basic users',
-          'Advanced capabilities for developers',
-          'Context-sensitive documentation',
-          'Smooth transition between modes',
-          'Customizable feature visibility'
+          'Developer profiles and portfolios',
+          'Contract sharing and collaboration',
+          'Community feedback and ratings',
+          'Discussion forums and Q&A',
+          'Code review and mentorship',
+          'Project showcases and galleries'
         ]
       },
       {
-        title: 'Enhanced Security Analysis',
-        description: 'Advanced security scanning and vulnerability detection',
+        title: 'Advanced Security Analysis',
+        description: 'Comprehensive security scanning and vulnerability detection',
         icon: Shield,
         details: [
-          'Common vulnerability checks',
+          'Automated vulnerability scanning',
           'Gas optimization analysis',
           'Access control verification',
-          'Integration with security standards'
-        ]
-      },
-      {
-        title: 'Performance Optimization',
-        description: 'Tools for optimizing smart contract performance',
-        icon: Zap,
-        details: [
-          'Gas usage analysis',
-          'Performance benchmarking',
-          'Optimization suggestions',
-          'AI-assisted code improvements'
-        ]
-      },
-      {
-        title: 'Community Features',
-        description: 'Enhanced collaboration and sharing capabilities',
-        icon: Users,
-        details: [
-          'Contract sharing via links',
-          'Collaborative development',
-          'Community feedback system',
-          'Public contract templates'
+          'Common attack vector detection',
+          'Security score and recommendations',
+          'Integration with security audit tools'
         ]
       }
     ]
   },
   {
-    title: 'Future Plans (Q3 2025)',
+    title: 'Future Innovations (Q2-Q3 2025)',
     status: 'future',
     items: [
       {
-        title: 'Integrated Security Monitoring',
-        description: 'Ongoing security monitoring for deployed contracts',
-        icon: Shield,
+        title: 'AI-Powered Smart Contract Editor',
+        description: 'Revolutionary AI assistance for writing and reviewing smart contracts',
+        icon: BrainCircuit,
         details: [
-          'Real-time vulnerability scanning',
-          'Automated security alerts',
-          'Exploit prevention recommendations',
-          'Post-deployment security scoring',
-          'Historical security audit trail'
+          'Intelligent code generation from natural language',
+          'Automated security vulnerability detection and fixes',
+          'Code optimization suggestions and implementations',
+          'Real-time code review and best practice recommendations',
+          'Context-aware documentation generation',
+          'Smart refactoring and pattern recognition',
+          'Multi-language support (Solidity, Vyper, Rust)',
+          'Integration with major AI models for enhanced capabilities'
         ]
       },
       {
-        title: 'Contract Template Marketplace',
-        description: 'Community-driven template ecosystem with reputation system',
-        icon: Globe,
+        title: 'Visual Smart Contract Builder',
+        description: 'Drag-and-drop interface for creating smart contracts',
+        icon: Blocks,
         details: [
-          'User-submitted contract templates',
-          'Template ratings and reviews',
-          'Template monetization options',
-          'Expert verification badges',
-          'Customization and forking options'
+          'Visual programming interface with logic blocks',
+          'Pre-built function modules and components',
+          'Real-time code generation from visual design',
+          'Template-based contract assembly',
+          'Integration with existing code editor',
+          'Complex logic visualization and flowcharts'
         ]
       },
       {
-        title: 'Educational Achievement System',
-        description: 'Gamified learning path for smart contract development',
-        icon: BookOpen,
+        title: 'Advanced Testing & Simulation',
+        description: 'Comprehensive testing framework and simulation environment',
+        icon: TestTube,
         details: [
-          'Smart contract development challenges',
-          'Progressive skill-building modules',
-          'Achievement badges and certifications',
-          'Community recognition system',
-          'Practical security training exercises'
+          'Automated unit test generation',
+          'Integration testing with mock environments',
+          'Gas usage simulation and optimization',
+          'Load testing and performance benchmarking',
+          'Scenario-based testing with AI-generated test cases',
+          'Real-world condition simulation'
         ]
       },
       {
-        title: 'Cross-Chain Support',
-        description: 'Expand platform capabilities to support multiple blockchain networks',
-        icon: Globe,
+        title: 'Enterprise Development Suite',
+        description: 'Professional tools for large-scale smart contract development',
+        icon: Briefcase,
         details: [
-          'Ethereum integration',
-          'Multi-chain deployment',
-          'Cross-chain analytics',
-          'Unified interface for all chains'
+          'Team collaboration and version control',
+          'Advanced project management features',
+          'Enterprise-grade security and compliance',
+          'Custom deployment pipelines and CI/CD',
+          'Role-based access control and permissions',
+          'Advanced analytics and reporting dashboard'
         ]
       },
       {
-        title: 'Advanced Analytics',
-        description: 'Comprehensive analytics and reporting',
-        icon: LineChart,
+        title: 'DeFi Protocol Builder',
+        description: 'Specialized tools for building decentralized finance applications',
+        icon: Coins,
         details: [
-          'Contract usage analytics',
-          'Performance metrics',
-          'Trend analysis',
-          'Customizable reporting dashboard'
+          'Pre-built DeFi protocol templates',
+          'Liquidity pool and yield farming builders',
+          'Automated market maker (AMM) creation',
+          'Governance token and DAO setup',
+          'Risk assessment and economic modeling',
+          'Integration with major DeFi protocols'
+        ]
+      }
+    ]
+  },
+  {
+    title: 'Long-term Vision (Q4 2025 & Beyond)',
+    status: 'future',
+    items: [
+      {
+        title: 'Autonomous Smart Contract Auditor',
+        description: 'AI-powered autonomous security auditing system',
+        icon: ShieldCheck,
+        details: [
+          'Continuous automated security monitoring',
+          'Machine learning-based vulnerability prediction',
+          'Autonomous bug fixing and patching',
+          'Real-time threat detection and response',
+          'Formal verification integration',
+          'Compliance checking and regulatory alignment'
         ]
       },
       {
-        title: 'Advanced AI Features',
-        description: 'Expanded AI capabilities for enhanced development',
-        icon: Cpu,
+        title: 'Advanced Analytics & Intelligence',
+        description: 'Comprehensive blockchain analytics and business intelligence',
+        icon: BarChart3,
         details: [
-          'Smart code generation',
-          'Automated bug detection',
-          'Personalized recommendations',
-          'AI-powered contract optimization'
+          'Real-time contract performance monitoring',
+          'Predictive analytics for gas optimization',
+          'User behavior analysis and insights',
+          'Market trend analysis and recommendations',
+          'Custom dashboard and reporting tools',
+          'Integration with external data sources'
+        ]
+      },
+      {
+        title: 'Decentralized Development Network',
+        description: 'Distributed development and deployment infrastructure',
+        icon: Workflow,
+        details: [
+          'Decentralized build and deployment system',
+          'Distributed code storage and version control',
+          'Peer-to-peer collaboration network',
+          'Consensus-based code review process',
+          'Decentralized testing and validation',
+          'Token-based incentive system for contributors'
         ]
       }
     ]
   }
 ];
 
-const statusColors = {
-  completed: 'bg-green-500/10 text-green-500 border-green-500/30',
-  current: 'bg-primary/10 text-primary border-primary/30',
-  future: 'bg-purple-500/10 text-purple-500 border-purple-500/30'
-};
-
-const statusIcons = {
-  completed: CheckCircle2,
-  current: Clock,
-  future: Sparkles
-};
-
-const backgroundGradients = {
-  completed: 'from-green-500/5 to-transparent',
-  current: 'from-primary/5 to-transparent',
-  future: 'from-purple-500/5 to-transparent'
+const statusConfig = {
+  completed: {
+    color: 'bg-background border-border text-foreground',
+    icon: CheckCircle2,
+    gradient: 'bg-background/50',
+    label: 'Production Ready',
+    dotColor: 'bg-primary',
+    badgeColor: 'bg-green-500/10 text-green-600 border-green-500/20'
+  },
+  current: {
+    color: 'bg-background border-border text-foreground',
+    icon: Clock,
+    gradient: 'bg-background/50',
+    label: 'In Development', 
+    dotColor: 'bg-primary',
+    badgeColor: 'bg-primary/10 text-primary border-primary/20'
+  },
+  future: {
+    color: 'bg-background border-border text-foreground',
+    icon: Sparkles,
+    gradient: 'bg-background/50',
+    label: 'Planned',
+    dotColor: 'bg-primary',
+    badgeColor: 'bg-muted text-muted-foreground border-border'
+  }
 };
 
 export default function RoadmapPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-20">
       {/* Header */}
       <section className="relative py-12 md:py-16 mb-0">
         {/* Animated background */}
@@ -396,69 +327,90 @@ export default function RoadmapPage() {
               delay: 1,
             }}
           />
+          
+          {/* Grid pattern overlay */}
+          <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" 
+               style={{backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '30px 30px'}} />
         </div>
 
         <div className="container mx-auto px-4">
           <motion.div
-            className="max-w-3xl mx-auto text-center"
+            className="max-w-4xl mx-auto text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-indigo-500">
-              Karibu Roadmap
+              Karibu Development Roadmap
             </h1>
-            <motion.p
-              className="text-xl text-foreground/80 mb-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              Our journey to revolutionize smart contract development and analysis
-            </motion.p>
+            <p className="text-xl text-foreground/80 mb-8">
+              Building the future of smart contract development with AI-powered tools and comprehensive blockchain solutions
+            </p>
             
-            <motion.div
-              className="max-w-3xl mx-auto bg-background/50 border border-border/50 rounded-lg p-4 backdrop-blur-sm"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <p className="text-sm text-muted-foreground">
-                <strong>Current Network Support:</strong> Karibu currently supports the <span className="text-primary font-medium">Hedera Testnet</span> only. 
-                Our roadmap includes plans for additional networks in 2025.
-              </p>
-            </motion.div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              {['completed', 'current', 'future'].map((status, index) => {
+                const config = statusConfig[status as keyof typeof statusConfig];
+                const Icon = config.icon;
+                return (
+                  <motion.div
+                    key={status}
+                    className="bg-background border border-border rounded-lg p-6 hover:border-primary/50 transition-all duration-300"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 + (index * 0.1) }}
+                  >
+                    <div className="flex items-center mb-3">
+                      <Icon className="h-6 w-6 text-primary mr-2" />
+                      <span className={`px-2 py-1 rounded text-xs font-medium border ${config.badgeColor}`}>
+                        {status === 'completed' && 'Live'}
+                        {status === 'current' && 'Active'}
+                        {status === 'future' && 'Planned'}
+                      </span>
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">{config.label}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {status === 'completed' && 'Fully functional features ready for production use'}
+                      {status === 'current' && 'Currently under active development'}
+                      {status === 'future' && 'Planned for future development cycles'}
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </div>
+            
+
           </motion.div>
         </div>
       </section>
 
       {/* Roadmap Content */}
-      <section className="pt-2 pb-4">
+      <section className="pt-8 pb-12">
         <div className="container mx-auto px-4">
-          <div className="space-y-24 relative">
-            {/* Vertical timeline line */}
-            <div className="absolute left-0 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-purple-500 to-indigo-300 transform -translate-x-1/2 hidden md:block"></div>
+          <div className="space-y-16 relative max-w-6xl mx-auto">
             
             {roadmapItems.map((section, sectionIndex) => {
-              const StatusIcon = statusIcons[section.status as keyof typeof statusIcons];
+              const config = statusConfig[section.status as keyof typeof statusConfig];
+              const StatusIcon = config.icon;
+              
               return (
                 <motion.div
                   key={section.title}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: sectionIndex * 0.2 }}
+                  transition={{ duration: 0.6, delay: sectionIndex * 0.3 }}
                   className="relative"
                 >
-                  <div className="flex flex-col md:flex-row items-center gap-3 mb-10">
-                    <div className={`p-3 rounded-full ${statusColors[section.status as keyof typeof statusColors]} border z-10 shadow-lg`}>
-                      <StatusIcon className="w-6 h-6" />
+                  {/* Section Header */}
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-background border border-border">
+                      <StatusIcon className="h-5 w-5 text-primary" />
+                      <span className="font-semibold">{config.label}</span>
                     </div>
-                    <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-                      {section.title}
-                    </h2>
+                    <div className="flex-1 h-px bg-border" />
                   </div>
-
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:pl-12">
+                  
+                  {/* Features Grid */}
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {section.items.map((item, itemIndex) => {
                       const Icon = item.icon;
                       return (
@@ -466,28 +418,31 @@ export default function RoadmapPage() {
                           key={item.title}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: sectionIndex * 0.2 + itemIndex * 0.1 }}
-                          className={`bg-background/70 backdrop-blur-sm border border-border rounded-xl p-6 hover:border-primary/50 transition-all hover:shadow-md hover:shadow-primary/5 hover:-translate-y-1 duration-300 overflow-hidden relative group`}
+                          transition={{ duration: 0.5, delay: (sectionIndex * 0.3) + (itemIndex * 0.1) }}
+                          className="bg-background border border-border rounded-lg p-6 hover:border-primary/50 transition-all duration-300"
                         >
-                          <div className={`absolute inset-0 bg-gradient-to-b ${backgroundGradients[section.status as keyof typeof backgroundGradients]} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
-                          <div className="relative z-10">
-                            <div className="flex items-start gap-4">
-                              <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
-                                <Icon className="w-5 h-5 text-primary" />
-                              </div>
-                              <div>
-                                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                                <p className="text-sm text-muted-foreground mb-4">{item.description}</p>
-                                <ul className="space-y-2">
-                                  {item.details.map((detail) => (
-                                    <li key={detail} className="flex items-center gap-2 text-sm">
-                                      <ArrowRight className="w-3 h-3 text-primary flex-shrink-0" />
-                                      <span>{detail}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
+                          <div className="flex items-start gap-4 mb-4">
+                            <div className="p-3 rounded-lg bg-muted border border-border">
+                              <Icon className="h-6 w-6 text-primary" />
                             </div>
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                              <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            {item.details.map((detail, detailIndex) => (
+                              <div 
+                                key={detailIndex} 
+                                className="flex items-start gap-2 text-sm"
+                              >
+                                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                                <span className="text-muted-foreground">
+                                  {detail}
+                                </span>
+                              </div>
+                            ))}
                           </div>
                         </motion.div>
                       );
@@ -497,6 +452,44 @@ export default function RoadmapPage() {
               );
             })}
           </div>
+          
+          {/* Call to Action */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1 }}
+            className="mt-16 text-center"
+          >
+            <div className="max-w-3xl mx-auto bg-background border border-border rounded-lg p-8 text-center">
+              <h3 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-indigo-500">
+                Ready to Build the Future?
+              </h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                Join thousands of developers using Karibu to create, deploy, and manage smart contracts with AI-powered tools, comprehensive security analysis, and seamless deployment.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <motion.a
+                  href="/create"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Code className="h-5 w-5" />
+                  Start Building
+                  <ArrowRight className="h-4 w-4" />
+                </motion.a>
+                <motion.a
+                  href="/learn"
+                  className="inline-flex items-center gap-2 px-6 py-3 border border-border rounded-lg font-medium hover:bg-muted/50 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <BookOpen className="h-5 w-5" />
+                  Learn More
+                </motion.a>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
     </div>

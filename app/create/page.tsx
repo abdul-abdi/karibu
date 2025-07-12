@@ -127,7 +127,7 @@ function DeploymentProgress({ stage, progress, error }: {
     { id: 'prepare', label: 'Preparing Contract' },
     { id: 'link', label: 'Linking Libraries' },
     { id: 'compile', label: 'Final Compilation' },
-    { id: 'deploy', label: 'Deploying to Testnet' },
+    { id: 'deploy', label: 'Deploying' },
     { id: 'confirm', label: 'Confirming Transaction' },
     { id: 'complete', label: 'Deployment Complete' }
   ];
@@ -930,14 +930,14 @@ const CreateContractPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
             >
-              Build, compile and deploy Solidity smart contracts to Ethereum testnet in minutes — with real-time validation, security analysis, and multi-file project support.
+              Build, compile and deploy Solidity smart contracts to Ethereum mainnet and testnet in minutes — with real-time validation, security analysis, and multi-file project support.
             </motion.p>
             
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex justify-center gap-3"
+              className="flex justify-center gap-3 flex-wrap"
             >
               <Button
                 variant={ideMode === 'advanced' ? "secondary" : "default"}

@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { ContractFunction } from '@/app/types/contract';
 import { useToast } from '@/components/providers/toast-provider';
+import { handleContractError, handleUserRejectionError } from '@/components/ui/toast';
 // import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface ContractFunctionProps {
@@ -177,11 +178,8 @@ export default function ContractFunctionComponent({
         inputs: Object.values(inputValues)
       });
 
-      toast({
-        title: 'Execution Failed',
-        description: errorMessage,
-        type: 'error'
-      });
+      // Use enhanced error handling
+      handleContractError(err, toast, `Function: ${contractFunction.name}`);
     } finally {
       onLoading(contractFunction.name, false);
     }

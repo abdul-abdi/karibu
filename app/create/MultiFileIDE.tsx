@@ -2439,13 +2439,13 @@ const MultiFileIDE = forwardRef<MultiFileIDEHandle, MultiFileIDEProps>(({
               </code>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 size="sm"
                 onClick={() => router.push(`/interact/${deploymentResult.address}`)}
-                className="flex-1 h-8 text-xs"
+                className="flex-1 h-8 text-xs flex items-center justify-center gap-1"
               >
-                <ExternalLinkIcon className="h-3 w-3 mr-1" />
+                <ExternalLinkIcon className="h-3 w-3" />
                 Interact
               </Button>
               <Button
@@ -2457,10 +2457,11 @@ const MultiFileIDE = forwardRef<MultiFileIDEHandle, MultiFileIDEProps>(({
                     window.open(explorerUrl, '_blank');
                   }
                 }}
-                className="flex-1 h-8 text-xs"
+                className="flex-1 h-8 text-xs flex items-center justify-center gap-1"
               >
-                <ExternalLinkIcon className="h-3 w-3 mr-1" />
-                View on Explorer
+                <ExternalLinkIcon className="h-3 w-3" />
+                <span className="hidden sm:inline">View on Explorer</span>
+                <span className="sm:hidden">Explorer</span>
               </Button>
             </div>
           </motion.div>

@@ -32,6 +32,10 @@ export enum ContractErrorCode {
   // Wallet related errors
   WALLET_NOT_CONNECTED = 'WALLET_NOT_CONNECTED',
   WALLET_REJECTED = 'WALLET_REJECTED',
+  USER_REJECTED_TRANSACTION = 'USER_REJECTED_TRANSACTION',
+  USER_REJECTED_CONNECTION = 'USER_REJECTED_CONNECTION',
+  WALLET_ACCOUNT_LOCKED = 'WALLET_ACCOUNT_LOCKED',
+  WALLET_NETWORK_MISMATCH = 'WALLET_NETWORK_MISMATCH',
   
   // General errors
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
@@ -97,6 +101,12 @@ export class ErrorService {
     }
     
     const errorMessage = error?.message || error?.toString() || 'Unknown error';
+    const errorCode = error?.code;
+    
+    // Handle specific wallet rejection errors
+    if (this.isUserRejectionError(error)) {
+      return this.createUserRejectionError(error);
+    }
     
     // Handle JSON-RPC errors
     if (error?.code === -32000 || errorMessage.includes('execution reverted')) {
@@ -114,7 +124,7 @@ export class ErrorService {
         'Contract not found at the specified address',
         ContractErrorCode.CONTRACT_NOT_FOUND,
         error,
-        'Verify the contract address is correct and the contract is deployed on Hedera testnet.'
+        'Verify the contract address is correct and the contract is deployed on the selected network.'
       );
     }
     
@@ -133,16 +143,6 @@ export class ErrorService {
       return this.createParameterError(error);
     }
     
-    // Handle wallet errors
-    if (errorMessage.includes('wallet') || errorMessage.includes('user denied') || errorMessage.includes('user rejected')) {
-      return new ContractError(
-        'Wallet interaction was rejected',
-        ContractErrorCode.WALLET_REJECTED,
-        error,
-        'You need to confirm the transaction in your wallet.'
-      );
-    }
-    
     // Handle network errors
     if (errorMessage.includes('network') || errorMessage.includes('connection') || errorMessage.includes('timeout')) {
       return new ContractError(
@@ -150,6 +150,26 @@ export class ErrorService {
         ContractErrorCode.NETWORK_ERROR,
         error,
         'Check your internet connection and try again.'
+      );
+    }
+    
+    // Handle insufficient funds
+    if (errorMessage.includes('insufficient funds') || errorMessage.includes('insufficient balance')) {
+      return new ContractError(
+        'Insufficient funds for transaction',
+        ContractErrorCode.INSUFFICIENT_FUNDS,
+        error,
+        'You need more tokens to complete this transaction.'
+      );
+    }
+    
+    // Handle gas errors
+    if (errorMessage.includes('gas') || errorMessage.includes('out of gas')) {
+      return new ContractError(
+        'Transaction ran out of gas',
+        ContractErrorCode.INSUFFICIENT_GAS,
+        error,
+        'Try increasing the gas limit or gas price.'
       );
     }
     
@@ -259,6 +279,80 @@ export class ErrorService {
       ContractErrorCode.INVALID_PARAMETER,
       error,
       'Check the parameter values and try again.'
+    );
+  }
+  
+  /**
+   * Check if an error is a user rejection error
+   * @param error Error to check
+   * @returns boolean indicating if it's a user rejection error
+   */
+  private static isUserRejectionError(error: any): boolean {
+    const errorMessage = error?.message || error?.toString() || '';
+    const errorCode = error?.code;
+    
+    // Check for common user rejection patterns
+    const rejectionPatterns = [
+      'user rejected',
+      'user denied',
+      'user cancelled',
+      'user canceled',
+      'request rejected',
+      'transaction was rejected',
+      'signature was denied',
+      'user declined',
+      'cancelled by user',
+      'canceled by user',
+      'MetaMask Tx Signature: User denied',
+      'User denied transaction signature'
+    ];
+    
+    const lowerMessage = errorMessage.toLowerCase();
+    const hasRejectionPattern = rejectionPatterns.some(pattern => 
+      lowerMessage.includes(pattern.toLowerCase())
+    );
+    
+    // Check for specific error codes that indicate user rejection
+    const rejectionCodes = [4001, -32603, 'ACTION_REJECTED', 'USER_REJECTED'];
+    const hasRejectionCode = rejectionCodes.some(code => 
+      errorCode === code || errorCode?.toString() === code?.toString()
+    );
+    
+    return hasRejectionPattern || hasRejectionCode;
+  }
+  
+  /**
+   * Create a user-friendly error for user rejection
+   * @param error Original error
+   * @returns ContractError
+   */
+  private static createUserRejectionError(error: any): ContractError {
+    const errorMessage = error?.message || error?.toString() || '';
+    
+    // Determine the type of rejection
+    let errorCode = ContractErrorCode.WALLET_REJECTED;
+    let message = 'Transaction was cancelled';
+    let suggestion = 'To complete this action, please approve the transaction in your wallet.';
+    
+    if (errorMessage.includes('signature') || errorMessage.includes('sign')) {
+      errorCode = ContractErrorCode.USER_REJECTED_TRANSACTION;
+      message = 'Transaction signature was rejected';
+      suggestion = 'You need to approve the transaction signature in your wallet to proceed.';
+    } else if (errorMessage.includes('connection') || errorMessage.includes('connect')) {
+      errorCode = ContractErrorCode.USER_REJECTED_CONNECTION;
+      message = 'Wallet connection was rejected';
+      suggestion = 'Please connect your wallet to continue using the application.';
+    } else if (errorMessage.includes('switch') || errorMessage.includes('network')) {
+      errorCode = ContractErrorCode.WALLET_NETWORK_MISMATCH;
+      message = 'Network switch was rejected';
+      suggestion = 'Please switch to the correct network in your wallet.';
+    }
+    
+    return new ContractError(
+      message,
+      errorCode,
+      error,
+      suggestion
     );
   }
   

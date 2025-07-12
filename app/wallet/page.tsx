@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { formatToEvmAddress } from '../../app/utils/contract-utils';
 import { networkService } from '../utils/networks/network-service';
+import { ConstructionBanner } from '@/components/ui/construction-banner';
 
 type SmartContract = {
   contract_id: string;
@@ -272,6 +273,13 @@ const WalletContractsPage = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Construction Banner */}
+      <ConstructionBanner 
+        message="This section is still under construction. Some features may be limited."
+        variant="warning"
+        className="max-w-4xl mx-auto mb-8"
+      />
 
       {/* Wallet Search Form */}
       <section className="pt-2 pb-4">

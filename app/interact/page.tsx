@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { networkService } from '@/app/utils/networks/network-service';
 import { useToast } from '@/components/providers/toast-provider';
+import { ConstructionBanner } from '@/components/ui/construction-banner';
 
 export default function InteractPage() {
   const router = useRouter();
@@ -133,24 +134,69 @@ export default function InteractPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-muted/20">
-      <div className="container mx-auto px-4 py-8">
-        {/* Page Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-indigo-500">
-            Interact with Smart Contracts
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Connect to any smart contract on supported networks. Use the network switcher in the navbar to select your network.
-          </p>
-        </motion.div>
+    <div className="min-h-screen pb-20">
+      {/* Header */}
+      <section className="relative py-12 md:py-16 mb-0">
+        {/* Animated background */}
+        <div className="absolute inset-0 overflow-hidden -z-10">
+          <motion.div
+            className="absolute top-1/3 left-1/4 w-72 h-72 rounded-full bg-primary/10 blur-3xl"
+            animate={{
+              x: [0, -20, 0],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div
+            className="absolute bottom-1/4 right-1/3 w-64 h-64 rounded-full bg-purple-500/10 blur-3xl"
+            animate={{
+              y: [0, 30, 0],
+              opacity: [0.4, 0.6, 0.4],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          
+          {/* Grid pattern overlay */}
+          <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" 
+               style={{backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '30px 30px'}} />
+        </div>
 
-        {/* Main Split Layout */}
-        <div className="grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+        <div className="container mx-auto px-4">
+          <motion.div
+            className="max-w-3xl mx-auto text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-indigo-500">
+              Interact with Smart Contracts
+            </h1>
+            <p className="text-xl text-foreground/80 mb-2">
+              Connect to any smart contract on supported networks. Use the network switcher in the navbar to select your network.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Construction Banner */}
+      <ConstructionBanner 
+        message="This section is still under construction. Some features may be limited."
+        variant="warning"
+        className="max-w-4xl mx-auto mb-8"
+      />
+
+      {/* Main Content */}
+      <section className="pt-2 pb-12">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           
           {/* Left Side - Main Interaction */}
           <motion.div
@@ -160,7 +206,7 @@ export default function InteractPage() {
             className="space-y-6"
           >
             {/* Primary Interaction Card */}
-            <Card className="border-2 border-primary/20 shadow-xl">
+            <Card className="border-2 border-primary/20 shadow-xl bg-background/50 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Code className="h-6 w-6 text-primary" />
@@ -248,7 +294,7 @@ export default function InteractPage() {
             </Card>
 
             {/* Features Card */}
-            <Card>
+            <Card className="bg-background/50 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Zap className="h-5 w-5 text-primary" />
@@ -297,7 +343,7 @@ export default function InteractPage() {
             className="space-y-6"
           >
             {/* Recent Contracts */}
-            <Card>
+            <Card className="bg-background/50 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <History className="h-5 w-5 text-primary" />
@@ -318,7 +364,7 @@ export default function InteractPage() {
                   <div className="grid gap-3 max-h-80 overflow-y-auto">
                     {recentContracts.slice(0, 8).map((contract, index) => (
                       <motion.div
-                        key={`${contract.address}-${contract.network}`}
+                        key={`${contract.address}-${contract.network}-${contract.timestamp}-${index}`}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 * index }}
@@ -355,7 +401,7 @@ export default function InteractPage() {
             </Card>
 
             {/* Help Section */}
-            <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
+            <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
                   <HelpCircle className="h-5 w-5" />
@@ -405,7 +451,7 @@ export default function InteractPage() {
             </Card>
 
             {/* Additional Tips */}
-            <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20">
+            <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-300 text-lg">
                   <CheckCircle className="h-5 w-5" />
@@ -434,8 +480,9 @@ export default function InteractPage() {
               </CardContent>
             </Card>
           </motion.div>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 } 

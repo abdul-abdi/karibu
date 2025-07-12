@@ -4,12 +4,89 @@ import React, { useEffect, useState } from 'react';
 import { validateEnvironment } from '../../app/utils/validateEnv';
 import { checkEnvironmentSetup, logNetworkStatus } from '../../app/utils/helpers';
 import '@rainbow-me/rainbowkit/styles.css';
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider, createStorage } from 'wagmi';
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import { mainnet, polygon, optimism, arbitrum, base, zora, arbitrumSepolia, optimismSepolia, baseSepolia, zoraSepolia, zkSync, scroll, scrollSepolia, linea, lineaSepolia, polygonAmoy, blast, blastSepolia, mode, mantle, mantleSepoliaTestnet, metis, metisGoerli, bsc, bscTestnet, avalanche, avalancheFuji, fantom, fantomTestnet, lisk, liskSepolia } from 'wagmi/chains';
+import { 
+  // Ethereum networks
+  mainnet, sepolia, goerli, holesky,
+  // Polygon networks  
+  polygon, polygonAmoy, polygonMumbai, polygonZkEvm, polygonZkEvmTestnet, polygonZkEvmCardona,
+  // Optimism networks
+  optimism, optimismSepolia, optimismGoerli,
+  // Arbitrum networks
+  arbitrum, arbitrumNova, arbitrumSepolia, arbitrumGoerli,
+  // Base networks
+  base, baseSepolia, baseGoerli,
+  // Zora networks
+  zora, zoraSepolia, zoraTestnet,
+  // zkSync networks
+  zkSync, zkSyncSepoliaTestnet,
+  // Scroll networks
+  scroll, scrollSepolia,
+  // Linea networks
+  linea, lineaSepolia, lineaGoerli,
+  // Blast networks
+  blast, blastSepolia,
+  // Mode networks
+  mode, modeTestnet,
+  // Mantle networks
+  mantle, mantleTestnet, mantleSepoliaTestnet,
+  // Metis networks
+  metis, metisGoerli,
+  // BSC networks
+  bsc, bscTestnet,
+  // Avalanche networks
+  avalanche, avalancheFuji,
+  // Fantom networks
+  fantom, fantomTestnet,
+  // Lisk networks
+  lisk, liskSepolia,
+  // Hedera networks
+  hedera, hederaTestnet, hederaPreviewnet,
+  // Celo networks
+  celo, celoAlfajores,
+  // Aurora networks
+  aurora, auroraTestnet,
+  // Gnosis networks
+  gnosis, gnosisChiado,
+  // Moonbeam networks
+  moonbeam, moonriver, moonbaseAlpha,
+  // Other major L1/L2 networks
+  manta, mantaTestnet, mantaSepoliaTestnet,
+  fraxtal, fraxtalTestnet,
+  taiko, taikoTestnetSepolia, taikoHekla,
+  immutableZkEvm, immutableZkEvmTestnet,
+  berachainTestnet,
+  sapphire, sapphireTestnet,
+  cyber, cyberTestnet,
+  degen,
+  ancient8, ancient8Sepolia,
+  ronin, saigon,
+  klaytn, klaytnBaobab,
+  harmonyOne,
+  eon,
+  cronos, cronosTestnet,
+  evmos, evmosTestnet,
+  kava, kavaTestnet,
+  canto,
+  pulsechain, pulsechainV4,
+  dfk,
+  iotex, iotexTestnet,
+  wanchain, wanchainTestnet,
+  telos, telosTestnet,
+  rootstock, rootstockTestnet,
+  chiliz, spicy,
+  neonMainnet, neonDevnet,
+  palmTestnet, palm,
+  vechain,
+  zkFair, zkFairTestnet
+} from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { useMemo } from 'react';
-import { useChainId } from 'wagmi';
+import { serialize, deserialize } from 'wagmi';
+import { useChainId, useReconnect, useAccount } from 'wagmi';
 import { networkService } from '../../app/utils/networks/network-service';
 import networkRegistry from '../../app/utils/networks/network-registry';
 
@@ -56,13 +133,65 @@ function NetworkSync() {
   return null; // This component only handles side effects
 }
 
+// Auto-reconnection component to restore wallet connection on page load
+function ReconnectWallet() {
+  const { reconnect } = useReconnect();
+  const { isConnected } = useAccount();
+  
+  useEffect(() => {
+    // Only attempt to reconnect if not already connected
+    if (isConnected) {
+      console.log('Wallet already connected, skipping reconnection');
+      return;
+    }
+    
+    // Attempt to reconnect on app load
+    const attemptReconnect = async () => {
+      try {
+        console.log('Attempting to reconnect wallet...');
+        await reconnect();
+        console.log('Wallet reconnection attempt completed');
+      } catch (error) {
+        console.log('No previous connection to restore or reconnection failed:', error);
+        // This is expected if there's no previous connection
+      }
+    };
+
+    // Small delay to ensure wagmi is fully initialized
+    const timeoutId = setTimeout(attemptReconnect, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, [reconnect, isConnected]);
+
+  return null; // This component only handles side effects
+}
+
 export function AppProvider({ children }: AppProviderProps) {
   const [envChecked, setEnvChecked] = useState(false);
   const [envError, setEnvError] = useState<string | null>(null);
   const [envInstructions, setEnvInstructions] = useState<string | null>(null);
 
-  // Query client instance (memoised)
-  const queryClient = useMemo(() => new QueryClient(), []);
+  // Query client instance with enhanced configuration for persistence
+  const queryClient = useMemo(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        gcTime: 1_000 * 60 * 60 * 24, // 24 hours
+        staleTime: 1_000 * 60 * 5, // 5 minutes
+      },
+    },
+  }), []);
+
+  // Persister for TanStack Query data
+  const persister = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return createSyncStoragePersister({
+        storage: window.localStorage,
+        serialize,
+        deserialize,
+      });
+    }
+    return undefined;
+  }, []);
 
   // Get WalletConnect Project ID with validation
   const walletConnectProjectId = useMemo(() => {
@@ -78,6 +207,13 @@ export function AppProvider({ children }: AppProviderProps) {
     return projectId;
   }, []);
 
+  // Storage configuration for persistence across reloads
+  const storage = useMemo(() => {
+    return createStorage({
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    });
+  }, []);
+
   // Wagmi/RainbowKit config with standard chains (Hedera handled separately)
   const wagmiConfig = useMemo(() => {
     try {
@@ -85,40 +221,82 @@ export function AppProvider({ children }: AppProviderProps) {
         appName: 'Karibu',
         projectId: walletConnectProjectId,
         chains: [
-          // Ethereum networks - these are well-supported by Wagmi
-          mainnet, 
-          polygon, 
-          optimism, 
-          arbitrum, 
-          base, 
-          zora, 
-          arbitrumSepolia, 
-          optimismSepolia, 
-          baseSepolia, 
-          zoraSepolia, 
-          zkSync, 
-          scroll, 
-          scrollSepolia, 
-          linea, 
-          lineaSepolia, 
-          polygonAmoy, 
-          blast, 
-          blastSepolia, 
-          mode, 
-          mantle, 
-          mantleSepoliaTestnet, 
-          metis, 
-          metisGoerli, 
-          bsc, 
-          bscTestnet, 
-          avalanche, 
-          avalancheFuji, 
-          fantom, 
-          fantomTestnet, 
-          lisk, 
-          liskSepolia
+          // Ethereum networks
+          mainnet, sepolia, goerli, holesky,
+          // Polygon networks  
+          polygon, polygonAmoy, polygonMumbai, polygonZkEvm, polygonZkEvmTestnet, polygonZkEvmCardona,
+          // Optimism networks
+          optimism, optimismSepolia, optimismGoerli,
+          // Arbitrum networks
+          arbitrum, arbitrumNova, arbitrumSepolia, arbitrumGoerli,
+          // Base networks
+          base, baseSepolia, baseGoerli,
+          // Zora networks
+          zora, zoraSepolia, zoraTestnet,
+          // zkSync networks
+          zkSync, zkSyncSepoliaTestnet,
+          // Scroll networks
+          scroll, scrollSepolia,
+          // Linea networks
+          linea, lineaSepolia, lineaGoerli,
+          // Blast networks
+          blast, blastSepolia,
+          // Mode networks
+          mode, modeTestnet,
+          // Mantle networks
+          mantle, mantleTestnet, mantleSepoliaTestnet,
+          // Metis networks
+          metis, metisGoerli,
+          // BSC networks
+          bsc, bscTestnet,
+          // Avalanche networks
+          avalanche, avalancheFuji,
+          // Fantom networks
+          fantom, fantomTestnet,
+          // Lisk networks
+          lisk, liskSepolia,
+          // Hedera networks
+          hedera, hederaTestnet, hederaPreviewnet,
+          // Celo networks
+          celo, celoAlfajores,
+          // Aurora networks
+          aurora, auroraTestnet,
+          // Gnosis networks
+          gnosis, gnosisChiado,
+          // Moonbeam networks
+          moonbeam, moonriver, moonbaseAlpha,
+          // Other major L1/L2 networks
+          manta, mantaTestnet, mantaSepoliaTestnet,
+          fraxtal, fraxtalTestnet,
+          taiko, taikoTestnetSepolia, taikoHekla,
+          immutableZkEvm, immutableZkEvmTestnet,
+          berachainTestnet,
+          sapphire, sapphireTestnet,
+          cyber, cyberTestnet,
+          degen,
+          ancient8, ancient8Sepolia,
+          ronin, saigon,
+          klaytn, klaytnBaobab,
+          harmonyOne,
+          eon,
+          cronos, cronosTestnet,
+          evmos, evmosTestnet,
+          kava, kavaTestnet,
+          canto,
+          pulsechain, pulsechainV4,
+          dfk,
+          iotex, iotexTestnet,
+          wanchain, wanchainTestnet,
+          telos, telosTestnet,
+          rootstock, rootstockTestnet,
+          chiliz, spicy,
+          neonMainnet, neonDevnet,
+          palmTestnet, palm,
+          vechain,
+          zkFair, zkFairTestnet
         ],
         ssr: true,
+        storage,
         // Note: Hedera networks are handled separately through our network service
       });
     } catch (error) {
@@ -131,7 +309,7 @@ export function AppProvider({ children }: AppProviderProps) {
         ssr: true,
       });
     }
-  }, [walletConnectProjectId]);
+  }, [walletConnectProjectId, storage]);
 
   useEffect(() => {
     // Only run in development mode
@@ -189,25 +367,58 @@ Without a valid Project ID, you may experience:
 
   return (
     <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
-          <NetworkSync />
-          {process.env.NODE_ENV === 'development' && envError && (
-            <div className="bg-red-500 text-white px-4 py-3 text-center">
-              <p className="font-bold">{envError}</p>
-              {envInstructions && (
-                <details className="mt-2 text-left bg-red-400/20 p-4 rounded max-w-3xl mx-auto">
-                  <summary className="cursor-pointer font-medium mb-2">How to fix this</summary>
-                  <pre className="whitespace-pre-wrap text-xs bg-black/20 p-3 rounded">
-                    {envInstructions}
-                  </pre>
-                </details>
-              )}
-            </div>
-          )}
-          {children}
-        </RainbowKitProvider>
-      </QueryClientProvider>
+      {persister ? (
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{ persister }}
+        >
+          <RainbowKitProvider 
+            initialChain={mainnet}
+            showRecentTransactions={true}
+          >
+            <NetworkSync />
+            <ReconnectWallet />
+            {process.env.NODE_ENV === 'development' && envError && (
+              <div className="bg-red-500 text-white px-4 py-3 text-center">
+                <p className="font-bold">{envError}</p>
+                {envInstructions && (
+                  <details className="mt-2 text-left bg-red-400/20 p-4 rounded max-w-3xl mx-auto">
+                    <summary className="cursor-pointer font-medium mb-2">How to fix this</summary>
+                    <pre className="whitespace-pre-wrap text-xs bg-black/20 p-3 rounded">
+                      {envInstructions}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            )}
+            {children}
+          </RainbowKitProvider>
+        </PersistQueryClientProvider>
+      ) : (
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider 
+            initialChain={mainnet}
+            showRecentTransactions={true}
+          >
+            <NetworkSync />
+            <ReconnectWallet />
+            {process.env.NODE_ENV === 'development' && envError && (
+              <div className="bg-red-500 text-white px-4 py-3 text-center">
+                <p className="font-bold">{envError}</p>
+                {envInstructions && (
+                  <details className="mt-2 text-left bg-red-400/20 p-4 rounded max-w-3xl mx-auto">
+                    <summary className="cursor-pointer font-medium mb-2">How to fix this</summary>
+                    <pre className="whitespace-pre-wrap text-xs bg-black/20 p-3 rounded">
+                      {envInstructions}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            )}
+            {children}
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      )}
     </WagmiProvider>
   );
 } 

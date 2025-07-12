@@ -1,6 +1,7 @@
 import { Abi } from 'viem';
 import { useCallback, useState } from 'react';
 import { useWalletClient, usePublicClient } from 'wagmi';
+import { ErrorService } from '@/app/utils/error-service';
 
 interface WriteState {
   isWriting: boolean;
@@ -36,8 +37,10 @@ export function useContractWriter() {
       setState({ isWriting: false, txHash: hash, receipt });
       return receipt;
     } catch (error: any) {
-      setState({ isWriting: false, error });
-      throw error;
+      // Parse error using the enhanced error service
+      const parsedError = ErrorService.parseError(error);
+      setState({ isWriting: false, error: parsedError });
+      throw parsedError;
     }
   }, [walletClient, publicClient]);
 

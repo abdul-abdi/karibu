@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Abi } from 'viem';
 import { useWalletClient, usePublicClient } from 'wagmi';
+import { ErrorService } from '@/app/utils/error-service';
 
 interface DeployOptions {
   abi: Abi;
@@ -42,8 +43,10 @@ export function useContractDeployer() {
       setState({ isDeploying: false, txHash: hash, contractAddress: receipt.contractAddress as `0x${string}` });
       return receipt.contractAddress as `0x${string}`;
     } catch (error: any) {
-      setState({ isDeploying: false, error });
-      throw error;
+      // Parse error using the enhanced error service
+      const parsedError = ErrorService.parseError(error);
+      setState({ isDeploying: false, error: parsedError });
+      throw parsedError;
     }
   }, [walletClient, publicClient]);
 

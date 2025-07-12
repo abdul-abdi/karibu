@@ -189,7 +189,9 @@ export default function Header() {
 
           {/* Theme Switcher, GitHub Link and Mobile Menu Button */}
           <div className="flex items-center space-x-4">
-          <ConnectButton accountStatus="avatar" chainStatus="icon" showBalance={false} />
+          <div className="connect-button-purple">
+            <ConnectButton accountStatus="avatar" chainStatus="icon" showBalance={false} />
+          </div>
           <ThemeSwitcher />
            
             

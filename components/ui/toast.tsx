@@ -98,6 +98,155 @@ export function ToastContainer({
   );
 } 
 
+// Enhanced error handler for user rejection scenarios
+export const handleUserRejectionError = (error: any, toast: any, context?: string) => {
+  const errorMessage = error?.message || error?.toString() || '';
+  const errorCode = error?.code;
+  
+  // Check if this is a user rejection error
+  const isUserRejection = checkIfUserRejection(error);
+  
+  if (!isUserRejection) {
+    // Fall back to generic error handling
+    handleGenericError(error, toast);
+    return;
+  }
+  
+  // Determine the specific type of rejection
+  let title = 'Transaction Cancelled';
+  let description = 'You cancelled the transaction in your wallet.';
+  let icon = '🚫';
+  
+  if (errorMessage.includes('signature') || errorMessage.includes('sign')) {
+    title = 'Signature Rejected';
+    description = 'Transaction signature was rejected. You need to approve the transaction to proceed.';
+    icon = '✍️';
+  } else if (errorMessage.includes('connection') || errorMessage.includes('connect')) {
+    title = 'Connection Rejected';
+    description = 'Wallet connection was rejected. Please connect your wallet to continue.';
+    icon = '🔗';
+  } else if (errorMessage.includes('switch') || errorMessage.includes('network')) {
+    title = 'Network Switch Rejected';
+    description = 'Network switch was rejected. Please switch to the correct network manually.';
+    icon = '🌐';
+  }
+  
+  // Add context if provided
+  if (context) {
+    description = `${description} Context: ${context}`;
+  }
+  
+  toast({
+    title: `${icon} ${title}`,
+    description,
+    type: 'warning',
+    duration: 5000,
+    action: {
+      label: 'Try Again',
+      onClick: () => {
+        // The parent component can handle retry logic
+        console.log('User clicked retry after rejection');
+      }
+    }
+  });
+};
+
+// Helper function to check if an error is a user rejection
+const checkIfUserRejection = (error: any): boolean => {
+  const errorMessage = error?.message || error?.toString() || '';
+  const errorCode = error?.code;
+  
+  // Check for common user rejection patterns
+  const rejectionPatterns = [
+    'user rejected',
+    'user denied',
+    'user cancelled',
+    'user canceled',
+    'request rejected',
+    'transaction was rejected',
+    'signature was denied',
+    'user declined',
+    'cancelled by user',
+    'canceled by user',
+    'MetaMask Tx Signature: User denied',
+    'User denied transaction signature',
+    'request arguments: from:',
+    'Details: MetaMask Tx Signature: User denied'
+  ];
+  
+  const lowerMessage = errorMessage.toLowerCase();
+  const hasRejectionPattern = rejectionPatterns.some(pattern => 
+    lowerMessage.includes(pattern.toLowerCase())
+  );
+  
+  // Check for specific error codes that indicate user rejection
+  const rejectionCodes = [4001, -32603, 'ACTION_REJECTED', 'USER_REJECTED'];
+  const hasRejectionCode = rejectionCodes.some(code => 
+    errorCode === code || errorCode?.toString() === code?.toString()
+  );
+  
+  return hasRejectionPattern || hasRejectionCode;
+};
+
+// Generic error handler for non-user-rejection errors
+const handleGenericError = (error: any, toast: any) => {
+  const errorMessage = error?.message || error?.toString() || 'Unknown error';
+  
+  toast({
+    title: 'Error',
+    description: errorMessage.length > 100 ? 
+      `${errorMessage.substring(0, 100)}...` : 
+      errorMessage,
+    type: 'error',
+    duration: 6000,
+  });
+};
+
+// Enhanced contract error handler
+export const handleContractError = (error: any, toast: any, context?: string) => {
+  // First check if it's a user rejection
+  if (checkIfUserRejection(error)) {
+    handleUserRejectionError(error, toast, context);
+    return;
+  }
+  
+  const errorMessage = error?.message || error?.toString() || '';
+  
+  // Handle contract-specific errors
+  if (errorMessage.includes('execution reverted')) {
+    toast({
+      title: '⚠️ Contract Execution Failed',
+      description: 'The contract rejected the transaction. Please check your inputs and try again.',
+      type: 'error',
+      duration: 6000,
+    });
+  } else if (errorMessage.includes('insufficient funds')) {
+    toast({
+      title: '💰 Insufficient Balance',
+      description: 'You don\'t have enough tokens to complete this transaction.',
+      type: 'error',
+      duration: 6000,
+    });
+  } else if (errorMessage.includes('gas')) {
+    toast({
+      title: '⛽ Gas Error',
+      description: 'Transaction failed due to gas issues. Try increasing the gas limit.',
+      type: 'error',
+      duration: 6000,
+    });
+  } else if (errorMessage.includes('network')) {
+    toast({
+      title: '🌐 Network Error',
+      description: 'Network connection failed. Please check your internet connection.',
+      type: 'error',
+      duration: 6000,
+    });
+  } else {
+    // Fall back to generic error handling
+    handleGenericError(error, toast);
+  }
+};
+
 // WalletConnect specific error handler
 export const handleWalletConnectError = (error: Error, toast: any) => {
   const errorMessage = error.message.toLowerCase();

@@ -99,3 +99,63 @@
   scrollbar-gutter: stable;
   overscroll-behavior: contain;
 } 
+
+/* Custom purple styling for RainbowKit connect button */
+.connect-button-purple button[data-testid="connect-button"] {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%) !important;
+  border: 1px solid #a855f7 !important;
+  color: white !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.connect-button-purple button[data-testid="connect-button"]:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #7e22ce 100%) !important;
+  border-color: #9333ea !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Style the account button when connected */
+.connect-button-purple button[data-testid="account-button"] {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%) !important;
+  border: 1px solid #a855f7 !important;
+  color: white !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.connect-button-purple button[data-testid="account-button"]:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #7e22ce 100%) !important;
+  border-color: #9333ea !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Style the chain button */
+.connect-button-purple button[data-testid="chain-button"] {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%) !important;
+  border: 1px solid #a855f7 !important;
+  color: white !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.connect-button-purple button[data-testid="chain-button"]:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #7e22ce 100%) !important;
+  border-color: #9333ea !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Fallback for any button inside the wrapper */
+.connect-button-purple button {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%) !important;
+  border: 1px solid #a855f7 !important;
+  color: white !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.connect-button-purple button:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #7e22ce 100%) !important;
+  border-color: #9333ea !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+} 
