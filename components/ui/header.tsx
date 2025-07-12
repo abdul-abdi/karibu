@@ -189,7 +189,8 @@ export default function Header() {
 
           {/* Theme Switcher, GitHub Link and Mobile Menu Button */}
           <div className="flex items-center space-x-4">
-          <div className="connect-button-purple">
+          {/* Desktop Connect Button - hidden on mobile */}
+          <div className="connect-button-purple hidden md:block">
             <ConnectButton accountStatus="avatar" chainStatus="icon" showBalance={false} />
           </div>
           <ThemeSwitcher />
@@ -244,6 +245,22 @@ export default function Header() {
               </Link>
             </motion.div>
           ))}
+          
+          {/* Mobile Connect Button */}
+          <motion.div
+            variants={mobileNavItemVariants}
+            className="border-t border-border/30 mt-2 pt-2"
+          >
+            <div className="px-3 py-2">
+              <div className="connect-button-purple">
+                <ConnectButton 
+                  accountStatus="avatar" 
+                  chainStatus="icon" 
+                  showBalance={false}
+                />
+              </div>
+            </div>
+          </motion.div>
         </div>
       </motion.div>
 
