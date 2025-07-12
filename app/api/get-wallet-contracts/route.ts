@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MIRROR_NODE_TESTNET } from '../../utils/contract-utils';
 import { formatToEvmAddress } from '../../utils/contract-utils';
+import { networkService } from '../../utils/networks/network-service';
 
 /**
  * API route handler to fetch all contracts deployed by a specific wallet address
- * Uses a blockchain explorer API (currently Hedera Mirror Node) to find all contracts connected to the wallet
+ * Uses a blockchain explorer API to find all contracts connected to the wallet
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get the wallet address from the query params
+    // Get the wallet address and network from query params
     const { searchParams } = new URL(request.url);
     const address = searchParams.get('address');
+    const networkId = searchParams.get('networkId');
     
     if (!address) {
       return NextResponse.json(
@@ -21,113 +22,116 @@ export async function GET(request: NextRequest) {
     
     console.log(`Original address input: ${address}`);
     
+    // Initialize network service if not already initialized
+    if (!networkService.isInitialized()) {
+      await networkService.initialize();
+    }
+    
+    // Get the appropriate network adapter
+    const adapter = networkId 
+      ? networkService.getAdapterForNetwork(networkId) 
+      : networkService.getAdapter();
+    
+    if (!adapter) {
+      return NextResponse.json(
+        { error: 'No blockchain network available' },
+        { status: 500 }
+      );
+    }
+    
+    // Format the address according to network requirements
+    const formattedAddress = adapter.formatAddress(address);
+    
     // Convert the address to all known formats and query them all
-    const addressFormats = getAllAddressFormats(address);
+    const addressFormats = getAllAddressFormats(formattedAddress);
     console.log('Using the following address formats for search:', addressFormats);
     
     // Container for all found contracts
     let allContracts: any[] = [];
     
-    // Try different strategies with each address format
-    for (const format of addressFormats) {
-      await findContractsByFormat(format, allContracts);
+    // The network type determines the search strategy
+    const networkType = adapter.getConfig().type;
+    
+    if (networkType === 'hedera') {
+      // Hedera-specific search using Mirror node
+      // Try different strategies with each address format
+      for (const format of addressFormats) {
+        await findContractsByFormat(format, allContracts);
+      }
+    } else {
+      // For Ethereum networks, we'd need to implement a different strategy
+      // This would typically involve querying an explorer API like Etherscan
+      // or using logs/events to find contract creation transactions
+      
+      // For now, just log that this is not yet implemented
+      console.log(`Contract search for ${networkType} networks not yet implemented`);
+      
+      // TODO: Implement Ethereum contract search once we have the appropriate blockchain explorer API integrations
     }
     
     console.log(`Total contracts found (pre-enhancement): ${allContracts.length}`);
     
     // Add sample contracts if none found and this is our test wallet (address 0x3 or 0.0.3)
-    if (address === '0.0.3' || address.toLowerCase() === '0x0000000000000000000000000000000000000003') {
+    if ((address === '0.0.3' || address.toLowerCase() === '0x0000000000000000000000000000000000000003') 
+        && allContracts.length === 0) {
       console.log('Generating sample contracts for the test address');
-      
-      // Only add sample data if no real contracts were found
-      if (allContracts.length === 0) {
-        // Sample token contract
-        allContracts.push({
-          contract_id: '0.0.3000001',
-          evm_address: '0x0000000000000000000000000000000000000301',
-          created_timestamp: '1686249550.123456789',
-          memo: 'EVMCoin',
-          transaction_id: '0.0.3@1686249550.123456789',
-          name: 'EVM Coin',
-          runtime_bytecode: '18160ddd70a08231', // Contains ERC20 function signatures
-          admin_key: {
-            key: 'sample_key_data',
-            _type: 'ED25519'
-          }
-        });
-        
-        // Sample NFT contract
-        allContracts.push({
-          contract_id: '0.0.3000002',
-          evm_address: '0x0000000000000000000000000000000000000302',
-          created_timestamp: '1687150660.987654321',
-          memo: 'EVMCoin',
-          transaction_id: '0.0.3@1687150660.987654321',
-          name: 'EVM Coin',
-          runtime_bytecode: '6352211ec87b56dd', // Contains ERC721 function signatures
-          admin_key: {
-            key: 'sample_key_data',
-            _type: 'ED25519'
-          }
-        });
-        
-        // Sample governance contract
-        allContracts.push({
-          contract_id: '0.0.3000003',
-          evm_address: '0x0000000000000000000000000000000000000303',
-          created_timestamp: '1688261770.246813579',
-          memo: 'EVMCoin',
-          transaction_id: '0.0.3@1688261770.246813579',
-          name: 'EVM Coin',
-          runtime_bytecode: 'proposal', // Contains governance keyword
-          admin_key: {
-            key: 'sample_key_data',
-            _type: 'ED25519'
-          }
-        });
-      }
+      allContracts = generateSampleContracts();
     }
     
     // Enhance the contracts data with additional details for each contract
     const enhancedContracts = await Promise.all(allContracts.map(async (contract: any) => {
-      // Get more details about each contract
       try {
-        const contractId = contract.contract_id;
-        const contractUrl = `${MIRROR_NODE_TESTNET}/contracts/${contractId}`;
-        console.log(`Fetching details for contract ${contractId}`);
+        // Get the contract ID or address
+        const contractId = contract.contract_id || contract.address;
         
-        const contractResponse = await fetch(contractUrl);
-        
-        if (contractResponse.ok) {
-          const contractData = await contractResponse.json();
-          
-          // Try to get a better name from the contract's metadata or memo
-          const name = contractData.memo || `Contract ${contractId.split('.').pop()}`;
-          
-          // Merge the detailed contract data with our basic contract info
-          return {
-            ...contract,
-            ...contractData,
-            name,
-            // Ensure we have an EVM address
-            evm_address: contractData.evm_address || contract.evm_address || null
-          };
-        } else {
-          console.warn(`Failed to get details for contract ${contractId}: ${contractResponse.status}`);
-          // If we can't get full details, at least ensure we have a name and consistent structure
-          return {
-            ...contract,
-            name: `Contract ${contractId.split('.').pop()}`,
-            evm_address: contract.evm_address || null
-          };
+        if (!contractId) {
+          throw new Error('Contract missing ID or address');
         }
+        
+        // Use the appropriate format for the network
+        const formattedContractAddress = adapter.formatAddress(contractId);
+        
+        // Try to get contract ABI (if available)
+        let contractAbi = null;
+        try {
+          contractAbi = await adapter.getContractAbi(formattedContractAddress);
+        } catch (abiError) {
+          console.warn(`Could not get ABI for contract ${contractId}:`, abiError);
+        }
+        
+        // Get contract bytecode
+        let bytecode = null;
+        try {
+          bytecode = await adapter.getContractBytecode(formattedContractAddress);
+        } catch (bytecodeError) {
+          console.warn(`Could not get bytecode for contract ${contractId}:`, bytecodeError);
+        }
+        
+        // Get a usable name for the contract
+        const name = contract.name || contract.memo || `Contract ${contractId.split('.').pop()}`;
+        
+        // Provide explorer URL
+        const explorerUrl = adapter.getExplorerUrl('address', formattedContractAddress);
+        
+        // Return enhanced contract info
+        return {
+          ...contract,
+          name,
+          formattedAddress: formattedContractAddress,
+          bytecode: bytecode ? bytecode.substring(0, 100) + '...' : null,
+          hasAbi: !!contractAbi,
+          network: adapter.getConfig().name,
+          networkId: adapter.getConfig().id,
+          explorerUrl
+        };
       } catch (detailError) {
-        console.error(`Error fetching details for contract ${contract.contract_id}:`, detailError);
+        console.error(`Error enhancing contract ${contract.contract_id || contract.address}:`, detailError);
         // Return with minimal required fields if enhancement fails
         return {
           ...contract,
-          name: `Contract ${contract.contract_id.split('.').pop()}`,
-          evm_address: contract.evm_address || null
+          name: contract.name || `Contract ${(contract.contract_id || contract.address).split('.').pop()}`,
+          network: adapter.getConfig().name,
+          networkId: adapter.getConfig().id
         };
       }
     }));
@@ -137,7 +141,9 @@ export async function GET(request: NextRequest) {
     // Return the list of contracts
     return NextResponse.json({
       contracts: enhancedContracts,
-      count: enhancedContracts.length
+      count: enhancedContracts.length,
+      networkId: adapter.getConfig().id,
+      networkName: adapter.getConfig().name
     });
     
   } catch (error: any) {
@@ -151,9 +157,65 @@ export async function GET(request: NextRequest) {
 }
 
 /**
+ * Generate sample contracts for testing
+ */
+function generateSampleContracts(): any[] {
+  const sampleContracts = [];
+  
+  // Sample token contract
+  sampleContracts.push({
+    contract_id: '0.0.3000001',
+    evm_address: '0x0000000000000000000000000000000000000301',
+    created_timestamp: '1686249550.123456789',
+    memo: 'EVMCoin',
+    transaction_id: '0.0.3@1686249550.123456789',
+    name: 'EVM Coin',
+    runtime_bytecode: '18160ddd70a08231', // Contains ERC20 function signatures
+    admin_key: {
+      key: 'sample_key_data',
+      _type: 'ED25519'
+    }
+  });
+  
+  // Sample NFT contract
+  sampleContracts.push({
+    contract_id: '0.0.3000002',
+    evm_address: '0x0000000000000000000000000000000000000302',
+    created_timestamp: '1687150660.987654321',
+    memo: 'EVMCoin',
+    transaction_id: '0.0.3@1687150660.987654321',
+    name: 'EVM Coin',
+    runtime_bytecode: '6352211ec87b56dd', // Contains ERC721 function signatures
+    admin_key: {
+      key: 'sample_key_data',
+      _type: 'ED25519'
+    }
+  });
+  
+  // Sample governance contract
+  sampleContracts.push({
+    contract_id: '0.0.3000003',
+    evm_address: '0x0000000000000000000000000000000000000303',
+    created_timestamp: '1688261770.246813579',
+    memo: 'EVMCoin',
+    transaction_id: '0.0.3@1688261770.246813579',
+    name: 'EVM Coin',
+    runtime_bytecode: 'proposal', // Contains governance keyword
+    admin_key: {
+      key: 'sample_key_data',
+      _type: 'ED25519'
+    }
+  });
+  
+  return sampleContracts;
+}
+
+/**
  * Find contracts using different query strategies for a given address format
  */
 async function findContractsByFormat(format: AddressFormat, allContracts: any[]): Promise<void> {
+  const MIRROR_NODE_TESTNET = 'https://testnet.mirrornode.hedera.com/api/v1';
+  
   // Strategy 1: Get transactions where this account created contracts using account.id
   if (format.accountId) {
     try {

@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, BookOpen, Code, ExternalLink, FileText, Lightbulb, Search, Shield, Code2, CheckCircle, GraduationCap, Book, Coffee, FileCode, Users, Image, Scale, ShoppingCart, Sparkles, Circle, Coins, AlertTriangle, Swords, MessagesSquare, MessageCircle, MessageSquare, Wallet } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function LearnPage() {
   const [searchQuery, setSearchQuery] = useState('');

@@ -9,11 +9,17 @@ const FileSystemContext = createContext<FileSystemContextType | undefined>(undef
 
 // Helper function to save project to localStorage
 const saveProjectToLocalStorage = (project: FileSystemItem[]) => {
-  localStorage.setItem('karibu-project', JSON.stringify(project));
+  if (typeof window === 'undefined') return; // Server-side guard
+  try {
+    localStorage.setItem('karibu-project', JSON.stringify(project));
+  } catch (error) {
+    console.error('Error saving to localStorage:', error);
+  }
 };
 
 // Helper function to load project from localStorage
 const loadProjectFromLocalStorage = (): FileSystemItem[] => {
+  if (typeof window === 'undefined') return []; // Server-side guard
   try {
     const data = localStorage.getItem('karibu-project');
     if (data) {

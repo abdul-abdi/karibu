@@ -42,6 +42,10 @@ export interface DeploymentResult {
 // Contract call result
 export interface ContractCallResult {
   result: string | object;
+  success?: boolean;
+  transactionId?: string;
+  gasUsed?: string;
+  error?: string;
 }
 
 // Contract analysis result

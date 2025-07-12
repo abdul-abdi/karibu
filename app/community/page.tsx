@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Button } from '../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { MessageSquare, Users, Rocket, Lightbulb, Github, Code } from 'lucide-react';
 
 export default function CommunityPage() {

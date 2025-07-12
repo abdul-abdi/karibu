@@ -268,3 +268,61 @@ This project is licensed under the [ISC License](LICENSE)
 - [shadcn/ui](https://ui.shadcn.com/) for UI components
 - [Framer Motion](https://www.framer.com/motion/) for animations
 - [Google Gemini](https://gemini.google.com/) for AI assistance 
+
+## Troubleshooting
+
+### WalletConnect Issues
+
+If you encounter "Connection interrupted while trying to subscribe" or similar WalletConnect errors:
+
+#### 1. Get a Valid WalletConnect Project ID
+- Go to [WalletConnect Cloud Dashboard](https://cloud.walletconnect.com/)
+- Create a new project
+- Copy your Project ID
+- Add to your `.env.local` file:
+  ```
+  NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_actual_project_id_here
+  ```
+
+#### 2. Common Solutions
+- **Clear browser cache and localStorage** - WalletConnect stores connection data locally
+- **Check network connectivity** - Ensure stable internet connection
+- **Try a different browser** - Some browsers may block WebSocket connections
+- **Restart your wallet app** - Close and reopen your mobile wallet
+- **Switch networks and back** - Sometimes changing networks resolves connection issues
+
+#### 3. Alternative Connection Methods
+If WalletConnect continues to fail:
+- Use browser extension wallets (MetaMask, etc.) directly
+- Try different wallet apps that support WalletConnect
+- Use the wallet's built-in browser for dApp interactions
+
+#### 4. Development Mode
+In development, you can check the browser console for detailed error messages and debugging information.
+
+### Network Configuration Issues
+
+If you encounter errors like "Failed to initialize network hedera-testnet":
+
+#### 1. Hedera Networks
+- Hedera networks are handled separately from Ethereum networks
+- Missing Hedera credentials will show warnings but won't break the app
+- To enable full Hedera functionality, configure:
+  ```bash
+  HEDERA_OPERATOR_ID=0.0.your_account_id
+  HEDERA_OPERATOR_KEY=your_private_key
+  ```
+
+#### 2. Network Fallback
+- The app will automatically fallback to read-only mode if network initialization fails
+- You can still view contracts and interact with supported features
+- Check the browser console for specific network error messages
+
+#### 3. RPC Connection Issues
+If you see "could not detect network" errors:
+- **Automatic Fallbacks**: The app uses multiple RPC endpoints per network
+- **Retry Logic**: Failed connections automatically try backup endpoints  
+- **Graceful Degradation**: Networks continue in read-only mode if connections fail
+- **No App Crashes**: Network failures won't break the application
+
+The app includes reliable endpoints for major networks like Ethereum, Polygon, Arbitrum, Optimism, and Base. 

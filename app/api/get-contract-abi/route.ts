@@ -1,848 +1,382 @@
-import { ethers } from 'ethers';
-import { NextResponse } from 'next/server';
-import { 
-  formatToEvmAddress,
-  formatToEvmAddressAsync,
-  formatAddressForMirrorNode,
-  formatAddressForMirrorNodeAsync,
-  getContractBytecode,
-  executeJsonRpcCall,
-  contractAddressCache
-} from '../../utils/contract-utils';
-
-// Common ABIs for standard contracts
-const commonAbis: Record<string, string[]> = {
-  // ERC20 standard interface
-  erc20: [
-    'function name() view returns (string)',
-    'function symbol() view returns (string)',
-    'function decimals() view returns (uint8)',
-    'function totalSupply() view returns (uint256)',
-    'function balanceOf(address) view returns (uint256)',
-    'function transfer(address to, uint256 amount) returns (bool)',
-    'function allowance(address owner, address spender) view returns (uint256)',
-    'function approve(address spender, uint256 amount) returns (bool)',
-    'function transferFrom(address from, address to, uint256 amount) returns (bool)',
-    'event Transfer(address indexed from, address indexed to, uint256 value)',
-    'event Approval(address indexed owner, address indexed spender, uint256 value)'
-  ],
-  // ERC721 standard interface
-  erc721: [
-    'function name() view returns (string)',
-    'function symbol() view returns (string)',
-    'function tokenURI(uint256 tokenId) view returns (string)',
-    'function balanceOf(address owner) view returns (uint256)',
-    'function ownerOf(uint256 tokenId) view returns (address)',
-    'function safeTransferFrom(address from, address to, uint256 tokenId)',
-    'function transferFrom(address from, address to, uint256 tokenId)',
-    'function approve(address to, uint256 tokenId)',
-    'function getApproved(uint256 tokenId) view returns (address)',
-    'function setApprovalForAll(address operator, bool _approved)',
-    'function isApprovedForAll(address owner, address operator) view returns (bool)',
-    'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
-    'event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId)',
-    'event ApprovalForAll(address indexed owner, address indexed operator, bool approved)'
-  ],
-  // Simple storage contract
-  simpleStorage: [
-    'function store(uint256 num)',
-    'function retrieve() view returns (uint256)'
-  ],
-  // Counter contract
-  counter: [
-    'function increment()',
-    'function decrement()',
-    'function count() view returns (uint256)'
-  ]
-};
-
-// Common function signatures to detect by hash
-const FUNCTION_SIGNATURES: Record<string, { name: string, stateMutability: string, inputs: any[], outputs: any[] }> = {
-  // ERC20
-  '0x06fdde03': { name: 'name', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
-  '0x95d89b41': { name: 'symbol', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
-  '0x313ce567': { name: 'decimals', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint8' }] },
-  '0x18160ddd': { name: 'totalSupply', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  '0x70a08231': { name: 'balanceOf', stateMutability: 'view', inputs: [{ name: 'account', type: 'address' }], outputs: [{ type: 'uint256' }] },
-  '0xa9059cbb': { name: 'transfer', stateMutability: 'nonpayable', inputs: [{ name: 'to', type: 'address' }, { name: 'amount', type: 'uint256' }], outputs: [{ type: 'bool' }] },
-  '0xdd62ed3e': { name: 'allowance', stateMutability: 'view', inputs: [{ name: 'owner', type: 'address' }, { name: 'spender', type: 'address' }], outputs: [{ type: 'uint256' }] },
-  '0x095ea7b3': { name: 'approve', stateMutability: 'nonpayable', inputs: [{ name: 'spender', type: 'address' }, { name: 'amount', type: 'uint256' }], outputs: [{ type: 'bool' }] },
-  '0x23b872dd': { name: 'transferFrom', stateMutability: 'nonpayable', inputs: [{ name: 'from', type: 'address' }, { name: 'to', type: 'address' }, { name: 'amount', type: 'uint256' }], outputs: [{ type: 'bool' }] },
-  
-  // ERC721
-  '0x6352211e': { name: 'ownerOf', stateMutability: 'view', inputs: [{ name: 'tokenId', type: 'uint256' }], outputs: [{ type: 'address' }] },
-  '0xc87b56dd': { name: 'tokenURI', stateMutability: 'view', inputs: [{ name: 'tokenId', type: 'uint256' }], outputs: [{ type: 'string' }] },
-  '0x42842e0e': { name: 'safeTransferFrom', stateMutability: 'nonpayable', inputs: [{ name: 'from', type: 'address' }, { name: 'to', type: 'address' }, { name: 'tokenId', type: 'uint256' }], outputs: [] },
-  '0xb88d4fde': { name: 'safeTransferFrom', stateMutability: 'nonpayable', inputs: [{ name: 'from', type: 'address' }, { name: 'to', type: 'address' }, { name: 'tokenId', type: 'uint256' }, { name: 'data', type: 'bytes' }], outputs: [] },
-  
-  // Common functions
-  '0x893d20e8': { name: 'getOwner', stateMutability: 'view', inputs: [], outputs: [{ type: 'address' }] },
-  '0x8da5cb5b': { name: 'owner', stateMutability: 'view', inputs: [], outputs: [{ type: 'address' }] },
-  '0xd0e30db0': { name: 'deposit', stateMutability: 'payable', inputs: [], outputs: [] },
-  '0x3ccfd60b': { name: 'withdraw', stateMutability: 'nonpayable', inputs: [], outputs: [] },
-  '0x12065fe0': { name: 'getBalance', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  '0x6d4ce63c': { name: 'get', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  '0x371303c0': { name: 'set', stateMutability: 'nonpayable', inputs: [{ name: 'value', type: 'uint256' }], outputs: [] },
-  '0x60fe47b1': { name: 'set', stateMutability: 'nonpayable', inputs: [{ name: 'value', type: 'uint256' }], outputs: [] },
-};
-
-// HashIO JSON-RPC endpoint
-const HASHIO_RPC_ENDPOINT = 'https://testnet.hashio.io/api';
-
-// Define a utility function to generate human-readable function signatures from ABI
-function generateFunctionSignature(abiItem: any): string {
-  if (!abiItem.name) return '';
-  
-  // Extract the function name
-  let signature = `${abiItem.name}(`;
-  
-  // Add parameter types
-  if (abiItem.inputs && abiItem.inputs.length > 0) {
-    signature += abiItem.inputs.map((input: any) => {
-      // Include parameter name if available
-      return input.type + (input.name ? ` ${input.name}` : '');
-    }).join(', ');
-  }
-  
-  signature += ')';
-  
-  // Add state mutability if it's not the default
-  if (abiItem.stateMutability && abiItem.stateMutability !== 'nonpayable') {
-    signature += ` ${abiItem.stateMutability}`;
-  }
-  
-  // Add return types if any
-  if (abiItem.outputs && abiItem.outputs.length > 0) {
-    signature += ' returns (';
-    signature += abiItem.outputs.map((output: any) => {
-      // Include return parameter name if available
-      return output.type + (output.name ? ` ${output.name}` : '');
-    }).join(', ');
-    signature += ')';
-  }
-  
-  return signature;
-}
+import { NextRequest, NextResponse } from 'next/server';
+import { networkService } from '@/app/utils/networks/network-service';
 
 /**
- * Helper function to filter out placeholder function names from ABI
- * Only include functions with meaningful names
+ * API route handler for fetching contract ABI with multiple fallback strategies
+ * Combines Moralis service with blockchain explorer APIs for maximum reliability
  */
-function filterUnknownFunctions(abi: any[]): any[] {
-  if (!Array.isArray(abi)) return [];
-  
-  return abi.filter(item => {
-    // Keep non-function items (like events)
-    if (item.type !== 'function') return true;
-    
-    // Filter out placeholder function names (function_XXXX format)
-    return !item.name.startsWith('function_');
-  });
-}
-
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { 
-      contractAddress, 
-      bytecode,
-      disableTransactionHistory = false,
-      preferSource = false,
-      sourceOnly = false,
-      analysisMethod = '' 
+      contractAddress,
+      networkId,
+      forceRefresh = false,
+      preferSource = true,
+      bypassCache = false,
+      analysisMethod = 'comprehensive'
     } = await request.json();
-    
-    if (!contractAddress && !bytecode) {
-      return NextResponse.json({ error: 'Contract address or bytecode is required' }, { status: 400 });
+
+    if (!contractAddress) {
+      return NextResponse.json(
+        { error: 'Contract address is required' }, 
+        { status: 400 }
+      );
     }
-    
-    console.log('Fetching ABI for contract:', contractAddress);
-    
-    // If manual bytecode is provided, analyze it directly
-    if (bytecode) {
-      console.log('Using provided bytecode for analysis');
-      // Process the bytecode to extract function selectors
-      const abi = await analyzeBytecodeForFunctions(bytecode);
-      
-      return NextResponse.json({
-        abi: filterUnknownFunctions(abi),
-        source: 'manual-bytecode',
-        message: 'ABI generated from provided bytecode'
-      });
+
+    console.log(`Fetching ABI for contract ${contractAddress} on network ${networkId}`);
+
+    // Initialize network service if not already initialized
+    if (!networkService.isInitialized()) {
+      await networkService.initialize();
     }
-    
-    // Normalize the contract address format - get accurate EVM address
-    const evmAddress = await formatToEvmAddressAsync(contractAddress);
-    
-    // Format address for mirror node API using the async version
-    const mirrorNodeAddress = await formatAddressForMirrorNodeAsync(contractAddress);
-    
-    // First check if ABI is already available on the mirror node
-    const mirrorNodeUrl = `https://testnet.mirrornode.hedera.com/api/v1/contracts/${mirrorNodeAddress}`;
-    console.log('Querying mirror node:', mirrorNodeUrl);
-    
-    let contractData: any;
-    
+
+    // Switch to the specified network if provided
+    if (networkId) {
+      const switchSuccess = await networkService.changeNetwork(networkId);
+      if (!switchSuccess) {
+        console.warn(`Failed to switch to network ${networkId}, using active adapter`);
+      }
+    }
+
+    const adapter = networkService.getAdapter();
+    if (!adapter) {
+      return NextResponse.json(
+        { error: 'No blockchain network adapter available' },
+        { status: 500 }
+      );
+    }
+
+    let abi: any[] = [];
+    let source = 'unknown';
+    let isVerified = false;
+    let additionalInfo: any = {};
+
+    // Strategy 1: Try Moralis service first (most comprehensive)
     try {
-      const response = await fetch(mirrorNodeUrl);
+      console.log('Attempting to fetch ABI via Moralis service...');
+      const { MoralisContractService } = await import('@/app/utils/moralis-contract-service');
       
-      if (!response.ok) {
-        const errorStatus = response.status;
-        const errorText = response.statusText;
+      const moralisService = MoralisContractService.getInstance();
+      const chainId = adapter.getConfig().chainId || 1;
+      
+      if (moralisService.isChainSupported(chainId)) {
+        const contractInfo = await moralisService.getContractInfo(contractAddress, chainId);
         
-        // Provide specific error messages based on status code
-        if (errorStatus === 404) {
-          return NextResponse.json({ 
-            error: `Contract ${contractAddress} not found on the Hedera network. Please verify the contract address and try again.` 
-          }, { status: 404 });
-        } else if (errorStatus === 400) {
-          return NextResponse.json({ 
-            error: `Invalid contract address format (${contractAddress}). Please use a valid Hedera contract ID or EVM address.` 
-          }, { status: 400 });
-        } else {
-          throw new Error(`Mirror node API returned ${errorStatus}: ${errorText}`);
-        }
-      }
-      
-      contractData = await response.json();
-      console.log('Contract data retrieved');
-      
-      // If we have an ABI from mirror node, use it directly
-      if (contractData.abi && contractData.abi.length > 0) {
-        // We may have to parse it if it's a string
-        const parsedAbi = typeof contractData.abi === 'string' 
-          ? JSON.parse(contractData.abi) 
-          : contractData.abi;
-        
-        return NextResponse.json({
-          abi: filterUnknownFunctions(parsedAbi),
-          source: 'source',
-          message: 'ABI retrieved from verified source code'
-        });
-      }
-    } catch (error: any) {
-      console.error('Error querying mirror node:', error);
-      throw new Error('Failed to query mirror node');
-    }
-    
-    // Skip transaction history if requested (prioritize bytecode)
-    if (disableTransactionHistory || sourceOnly || preferSource || analysisMethod === 'bytecode') {
-      console.log('Transaction history analysis disabled, using bytecode analysis only');
-      // Analyze bytecode for function selectors
-      console.log('Performing direct bytecode analysis...');
-      
-      // Get the contract bytecode directly
-      try {
-        // First try to get bytecode from contract data response
-        let bytecodeToAnalyze = contractData.bytecode;
-        
-        if (!bytecodeToAnalyze) {
-          // If not available, request it using our specialized endpoint
-          // For server-side API routes, we need an absolute URL
-          let baseUrl;
-          const origin = request.headers.get('origin');
-          if (origin) {
-            baseUrl = origin;
-          } else {
-            const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-            const host = process.env.VERCEL_URL || 'localhost:3000';
-            baseUrl = `${protocol}://${host}`;
-          }
-          
-          const bytecodeResponse = await fetch(`${baseUrl}/api/get-contract-bytecode`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ contractAddress }),
-          });
-          
-          if (!bytecodeResponse.ok) {
-            throw new Error('Failed to fetch contract bytecode');
-          }
-          
-          const bytecodeData = await bytecodeResponse.json();
-          bytecodeToAnalyze = bytecodeData.bytecode;
-        }
-        
-        if (!bytecodeToAnalyze) {
-          throw new Error('No bytecode available for analysis');
-        }
-        
-        // Analyze the bytecode for function selectors
-        const abi = await analyzeBytecodeForFunctions(bytecodeToAnalyze);
-        
-        return NextResponse.json({
-          abi: filterUnknownFunctions(abi),
-          source: 'bytecode',
-          message: 'ABI generated from bytecode analysis'
-        });
-      } catch (bytecodeError: any) {
-        console.error('Bytecode analysis failed:', bytecodeError.message);
-        throw new Error(`Failed to analyze contract bytecode: ${bytecodeError.message}`);
-      }
-    }
-    
-    // Otherwise, we'll try to determine the ABI from function calls
-    // This code will only run if disableTransactionHistory is false
-    // Check contract interaction history to see if we can determine functions
-    const contractResultsUrl = `https://testnet.mirrornode.hedera.com/api/v1/contracts/${mirrorNodeAddress}/results`;
-    console.log('Fetching contract results:', contractResultsUrl);
-    
-    const resultsResponse = await fetch(contractResultsUrl);
-    
-    if (!resultsResponse.ok) {
-      throw new Error(`Failed to fetch contract results: ${resultsResponse.status}`);
-    }
-    
-    const resultsData = await resultsResponse.json();
-    console.log('Contract results retrieved, analyzing function calls');
-    
-    // Extract function selectors from transaction history
-    const functionCalls = resultsData.results?.map(result => {
-      // Ensure we're working with a string or return undefined if not
-      const params = result.function_parameters;
-      return typeof params === 'string' ? params.substring(0, 10) : undefined;
-    }) || [];
-    const uniqueFunctionCalls = [...new Set(functionCalls)].filter(Boolean) as string[];
-    
-    console.log('Detected function calls:', uniqueFunctionCalls);
-    
-    // If we found function calls in history, use them to build ABI
-    if (uniqueFunctionCalls.length > 0 && uniqueFunctionCalls[0] !== '0x') {
-      // For each function call, get the signature
-      const abi = [];
-      const functionSignatures = [];
-      
-      for (const selector of uniqueFunctionCalls) {
-        const signatureData = await lookupFunctionSignature(selector);
-        
-        if (signatureData.name && signatureData.name !== 'unknown') {
-          // Add to ABI
-          abi.push({
-            type: 'function',
-            name: signatureData.name,
-            inputs: signatureData.inputTypes.map((type, index) => ({
-              name: `param${index}`,
-              type
-            })),
-            outputs: signatureData.outputTypes.map((type, index) => ({
-              name: `output${index}`,
-              type
-            })),
-            stateMutability: signatureData.stateMutability
-          });
-          
-          // Add to function signatures
-          functionSignatures.push(signatureData.signature);
-        }
-      }
-      
-      return NextResponse.json({
-        abi: filterUnknownFunctions(abi),
-        functionSignatures,
-        source: 'transaction',
-        message: 'ABI generated from contract transaction history'
-      });
-    }
-    
-    // As a last resort, try bytecode analysis
-    console.log('No transaction history, attempting bytecode analysis...');
-    
-    try {
-      // Get the bytecode using our improved bytecode analysis endpoint
-      // For server-side API routes, we need an absolute URL
-      let baseUrl;
-      const origin = request.headers.get('origin');
-      if (origin) {
-        baseUrl = origin;
-      } else {
-        const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-        const host = process.env.VERCEL_URL || 'localhost:3000';
-        baseUrl = `${protocol}://${host}`;
-      }
-      
-      const bytecodeResponse = await fetch(`${baseUrl}/api/get-contract-bytecode`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ contractAddress }),
-      });
-      
-      if (!bytecodeResponse.ok) {
-        throw new Error('Failed to fetch contract bytecode');
-      }
-      
-      const bytecodeData = await bytecodeResponse.json();
-      const abi = await analyzeBytecodeForFunctions(bytecodeData.bytecode);
-      
-      return NextResponse.json({
-        abi: filterUnknownFunctions(abi),
-        source: 'bytecode',
-        message: 'ABI generated from bytecode analysis'
-      });
-    } catch (bytecodeError: any) {
-      console.error('All ABI resolution methods failed');
-      return NextResponse.json({
-        error: 'Could not determine ABI using any available method',
-        errorType: 'ABI_RESOLUTION_FAILED'
-      }, { status: 404 });
-    }
-  } catch (error: any) {
-    console.error('Error in get-contract-abi route:', error);
-    return NextResponse.json({ 
-      error: error.message || 'An unexpected error occurred' 
-    }, { status: 500 });
-  }
-}
-
-// Helper function to analyze bytecode for function selectors
-async function analyzeBytecodeForFunctions(bytecode: string): Promise<any[]> {
-  // Extract function selectors from bytecode
-  const functionSelectors = extractSelectorsFromBytecode(bytecode);
-  console.log(`Extracted ${functionSelectors.length} function selectors from bytecode`);
-  
-  // Convert selectors to ABI format
-  const abi = [];
-  
-  // First, look up known signatures in the FUNCTION_SIGNATURES database
-  for (const selector of functionSelectors) {
-    if (FUNCTION_SIGNATURES[selector]) {
-      abi.push(FUNCTION_SIGNATURES[selector]);
-      continue;
-    }
-    
-    // Try to look up using external service
-    try {
-      const signatureData = await lookupFunctionSignature(selector);
-      
-      if (signatureData.name && signatureData.name !== 'unknown') {
-        // Add to ABI
-        abi.push({
-          type: 'function',
-          name: signatureData.name,
-          inputs: signatureData.inputTypes.map((type, index) => ({
-            name: `param${index}`,
-            type
-          })),
-          outputs: signatureData.outputTypes.map((type, index) => ({
-            name: `output${index}`,
-            type
-          })),
-          stateMutability: signatureData.stateMutability || 'nonpayable'
-        });
-      } else {
-        // Add a placeholder if we can't resolve the signature
-        abi.push({
-          type: 'function',
-          name: `function_${selector.substr(2)}`,
-          inputs: [],
-          outputs: [],
-          stateMutability: 'nonpayable'
-        });
-      }
-    } catch (err) {
-      // If lookup fails, add a placeholder
-      abi.push({
-        type: 'function',
-        name: `function_${selector.substr(2)}`,
-        inputs: [],
-        outputs: [],
-        stateMutability: 'nonpayable'
-      });
-    }
-  }
-  
-  // Add standard functions that might be missing from bytecode
-  addStandardFunctions(abi);
-  
-  // Final step: Filter out placeholder functions before returning
-  return filterUnknownFunctions(abi);
-}
-
-// Function to extract function selectors from bytecode
-function extractSelectorsFromBytecode(bytecode: string): string[] {
-  const selectors: string[] = [];
-  
-  // Remove 0x prefix if present
-  const cleanBytecode = bytecode.startsWith('0x') ? bytecode.substring(2) : bytecode;
-  
-  // Look for push4 opcodes followed by function selectors
-  // PUSH4 opcode is 0x63, followed by 4 bytes of selector
-  const regex = /63([0-9a-f]{8})/gi;
-  let match;
-  
-  while ((match = regex.exec(cleanBytecode)) !== null) {
-    const selector = `0x${match[1]}`;
-    selectors.push(selector);
-  }
-  
-  return [...new Set(selectors)]; // Remove duplicates
-}
-
-// Modify the addStandardFunctions function to be more cautious
-function addStandardFunctions(abi: any[]): void {
-  // Don't add any assumed functions - this makes the ABI more accurate
-  // Only use what we've directly detected from the contract's bytecode
-  
-  // Legacy code retained in comments for reference
-  /*
-  // Check if we have any ERC20-like functions
-  const hasErc20Functions = abi.some(func => 
-    ['balanceOf', 'transfer', 'transferFrom', 'approve'].includes(func.name)
-  );
-  
-  if (hasErc20Functions) {
-    // Add any missing ERC20 functions
-    const erc20Functions = ['name', 'symbol', 'decimals', 'totalSupply', 'balanceOf', 'transfer', 'allowance', 'approve', 'transferFrom'];
-    
-    for (const funcName of erc20Functions) {
-      if (!abi.some(f => f.name === funcName)) {
-        // Find in FUNCTION_SIGNATURES and add if available
-        const selector = Object.keys(FUNCTION_SIGNATURES).find(
-          key => FUNCTION_SIGNATURES[key].name === funcName
-        );
-        
-        if (selector) {
-          abi.push(FUNCTION_SIGNATURES[selector]);
-        }
-      }
-    }
-  }
-  */
-}
-
-/**
- * Discover contract functions by testing known function selectors
- */
-async function discoverFunctionsViaSelectors(contractAddress: string): Promise<any[]> {
-  // Make sure we have the 0x prefix for RPC calls
-  const evmAddress = contractAddress.startsWith('0x') ? contractAddress : `0x${contractAddress}`;
-  
-  const discoveredFunctions: any[] = [];
-  const testedSelectors = new Set<string>();
-  
-  // First, test all known function signatures
-  console.log(`Testing ${Object.keys(FUNCTION_SIGNATURES).length} known function selectors`);
-  
-  for (const [selector, funcDef] of Object.entries(FUNCTION_SIGNATURES)) {
-    // Skip duplicates
-    if (testedSelectors.has(selector)) continue;
-    testedSelectors.add(selector);
-    
-    try {
-      const result = await callContractWithSelector(evmAddress, selector);
-      // If we don't get an error, this function likely exists
-      if (result && !result.includes('error')) {
-        console.log(`Discovered function via selector ${selector}: ${funcDef.name}`);
-        discoveredFunctions.push({
-          type: 'function',
-          name: funcDef.name,
-          inputs: funcDef.inputs,
-          outputs: funcDef.outputs,
-          stateMutability: funcDef.stateMutability
-        });
-      }
-    } catch (error) {
-      // Skip - function doesn't exist
-    }
-  }
-  
-  // Remove the heuristic that adds additional ERC20 functions
-  // Only include functions that were actually detected in the bytecode
-  
-  /* 
-  // Additional heuristics for common patterns
-  if (discoveredFunctions.some(f => f.name === 'name') && 
-      discoveredFunctions.some(f => f.name === 'symbol') && 
-      discoveredFunctions.some(f => f.name === 'balanceOf')) {
-    // This is likely a token contract - add related functions
-    const tokenFunctions = discoveredFunctions.map(f => f.name);
-    
-    // Add other ERC20 functions if they're not already detected
-    if (!tokenFunctions.includes('totalSupply')) {
-      discoveredFunctions.push({
-        type: 'function',
-        name: 'totalSupply',
-        inputs: [],
-        outputs: [{ type: 'uint256' }],
-        stateMutability: 'view'
-      });
-    }
-    
-    if (!tokenFunctions.includes('transfer')) {
-      discoveredFunctions.push({
-        type: 'function',
-        name: 'transfer',
-        inputs: [
-          { name: 'to', type: 'address' },
-          { name: 'amount', type: 'uint256' }
-        ],
-        outputs: [{ type: 'bool' }],
-        stateMutability: 'nonpayable'
-      });
-    }
-  }
-  */
-  
-  return discoveredFunctions;
-}
-
-/**
- * Call a contract with a given function selector to test if it exists
- */
-async function callContractWithSelector(address: string, selector: string): Promise<string> {
-  try {
-    const response = await fetch(HASHIO_RPC_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Origin': 'https://karibu.vercel.app'
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: Math.floor(Math.random() * 1000000),
-        method: 'eth_call',
-        params: [
-          {
-            to: address,
-            data: selector
-          },
-          'latest'
-        ]
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    return data.result || data.error?.message || 'error';
-  } catch (error: any) {
-    throw new Error(`Error calling contract with selector: ${error.message}`);
-  }
-}
-
-// Helper function to detect contract type from call results
-function detectContractTypeFromResults(results: any[]): string | null {
-  if (!results || results.length === 0) return null;
-  
-  let functionCalls = new Set();
-  
-  // Extract function signatures from results
-  results.forEach(result => {
-    if (result.function_parameters) {
-      const funcName = result.function_parameters.split('(')[0];
-      if (funcName) functionCalls.add(funcName);
-    }
-  });
-  
-  console.log('Detected function calls:', Array.from(functionCalls));
-  
-  // Check for ERC20 functions
-  if (
-    functionCalls.has('transfer') || 
-    functionCalls.has('balanceOf') || 
-    functionCalls.has('approve')
-  ) {
-    return 'erc20';
-  }
-  
-  // Check for ERC721 functions
-  if (
-    functionCalls.has('ownerOf') || 
-    functionCalls.has('safeTransferFrom') || 
-    functionCalls.has('tokenURI')
-  ) {
-    return 'erc721';
-  }
-  
-  // Check for SimpleStorage
-  if (
-    functionCalls.has('store') && 
-    functionCalls.has('retrieve')
-  ) {
-    return 'simpleStorage';
-  }
-  
-  // Check for Counter
-  if (
-    functionCalls.has('increment') || 
-    functionCalls.has('decrement') || 
-    functionCalls.has('count')
-  ) {
-    return 'counter';
-  }
-  
-  return null;
-}
-
-// Helper to detect ERC20 token
-async function detectERC20(contractAddress: string): Promise<boolean> {
-  try {
-    // Use HashIO JSON-RPC to check for ERC20 interface support
-    const response = await fetch('https://testnet.hashio.io/api', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Origin': 'https://karibu.vercel.app'
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'eth_call',
-        params: [
-          {
-            to: contractAddress.startsWith('0x') ? contractAddress : `0x${contractAddress}`,
-            data: '0x06fdde03' // name()
-          },
-          'latest'
-        ]
-      })
-    });
-    
-    if (!response.ok) {
-      return false;
-    }
-    
-    const data = await response.json();
-    return !!data.result && data.result !== '0x' && !data.error;
-  } catch (error) {
-    return false;
-  }
-}
-
-// Helper to detect ERC721 token
-async function detectERC721(contractAddress: string): Promise<boolean> {
-  try {
-    // Use HashIO JSON-RPC to check for ERC721 interface support
-    const supportsERC721Interface = await fetch('https://testnet.hashio.io/api', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Origin': 'https://karibu.vercel.app'
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'eth_call',
-        params: [
-          {
-            to: contractAddress.startsWith('0x') ? contractAddress : `0x${contractAddress}`,
-            data: '0x01ffc9a780ac58cd00000000000000000000000000000000000000000000000000000000' // supportsInterface(0x80ac58cd) - ERC721 interface id
-          },
-          'latest'
-        ]
-      })
-    });
-    
-    if (!supportsERC721Interface.ok) {
-      return false;
-    }
-    
-    const data = await supportsERC721Interface.json();
-    
-    // Check for a positive response
-    return data.result === '0x0000000000000000000000000000000000000000000000000000000000000001';
-  } catch (error) {
-    return false;
-  }
-}
-
-/**
- * Convert a Hedera contract ID to an EVM address
- * @param contractId Contract ID in any format (0x, Hedera ID, or raw hex)
- * @returns Normalized EVM address with 0x prefix
- */
-function convertToEvmAddress(contractId: string): string {
-  console.log(`Converting contract ID to EVM address: ${contractId}`);
-  
-  // Use the shared utility function for consistent handling across the app
-  return formatToEvmAddress(contractId);
-}
-
-/**
- * Look up function signature for a given selector
- * @param selector The function selector (first 4 bytes of keccak hash)
- * @returns Function metadata including name, signature, input/output types
- */
-async function lookupFunctionSignature(selector: string) {
-  // Common function selectors database - we'll check here first
-  const commonSelectors: Record<string, any> = {
-    // ERC20 functions
-    '0x06fdde03': { name: 'name', signature: 'name()', inputTypes: [], outputTypes: ['string'], stateMutability: 'view' },
-    '0x95d89b41': { name: 'symbol', signature: 'symbol()', inputTypes: [], outputTypes: ['string'], stateMutability: 'view' },
-    '0x313ce567': { name: 'decimals', signature: 'decimals()', inputTypes: [], outputTypes: ['uint8'], stateMutability: 'view' },
-    '0x18160ddd': { name: 'totalSupply', signature: 'totalSupply()', inputTypes: [], outputTypes: ['uint256'], stateMutability: 'view' },
-    '0x70a08231': { name: 'balanceOf', signature: 'balanceOf(address)', inputTypes: ['address'], outputTypes: ['uint256'], stateMutability: 'view' },
-    '0xa9059cbb': { name: 'transfer', signature: 'transfer(address,uint256)', inputTypes: ['address', 'uint256'], outputTypes: ['bool'], stateMutability: 'nonpayable' },
-    '0xdd62ed3e': { name: 'allowance', signature: 'allowance(address,address)', inputTypes: ['address', 'address'], outputTypes: ['uint256'], stateMutability: 'view' },
-    '0x095ea7b3': { name: 'approve', signature: 'approve(address,uint256)', inputTypes: ['address', 'uint256'], outputTypes: ['bool'], stateMutability: 'nonpayable' },
-    '0x23b872dd': { name: 'transferFrom', signature: 'transferFrom(address,address,uint256)', inputTypes: ['address', 'address', 'uint256'], outputTypes: ['bool'], stateMutability: 'nonpayable' },
-    
-    // ERC721 functions
-    '0x6352211e': { name: 'ownerOf', signature: 'ownerOf(uint256)', inputTypes: ['uint256'], outputTypes: ['address'], stateMutability: 'view' },
-    '0xc87b56dd': { name: 'tokenURI', signature: 'tokenURI(uint256)', inputTypes: ['uint256'], outputTypes: ['string'], stateMutability: 'view' },
-    '0x42842e0e': { name: 'safeTransferFrom', signature: 'safeTransferFrom(address,address,uint256)', inputTypes: ['address', 'address', 'uint256'], outputTypes: [], stateMutability: 'nonpayable' },
-    '0xb88d4fde': { name: 'safeTransferFrom', signature: 'safeTransferFrom(address,address,uint256,bytes)', inputTypes: ['address', 'address', 'uint256', 'bytes'], outputTypes: [], stateMutability: 'nonpayable' },
-    
-    // Admin/ownership functions
-    '0x8da5cb5b': { name: 'owner', signature: 'owner()', inputTypes: [], outputTypes: ['address'], stateMutability: 'view' },
-    '0x893d20e8': { name: 'getOwner', signature: 'getOwner()', inputTypes: [], outputTypes: ['address'], stateMutability: 'view' },
-    
-    // Simple storage and utility functions
-    '0x6d4ce63c': { name: 'get', signature: 'get()', inputTypes: [], outputTypes: ['uint256'], stateMutability: 'view' },
-    '0x60fe47b1': { name: 'set', signature: 'set(uint256)', inputTypes: ['uint256'], outputTypes: [], stateMutability: 'nonpayable' },
-    '0x371303c0': { name: 'set', signature: 'set(uint256,uint256)', inputTypes: ['uint256', 'uint256'], outputTypes: [], stateMutability: 'nonpayable' },
-    '0xd0e30db0': { name: 'deposit', signature: 'deposit()', inputTypes: [], outputTypes: [], stateMutability: 'payable' },
-    '0x3ccfd60b': { name: 'withdraw', signature: 'withdraw()', inputTypes: [], outputTypes: [], stateMutability: 'nonpayable' },
-    '0x12065fe0': { name: 'getBalance', signature: 'getBalance()', inputTypes: [], outputTypes: ['uint256'], stateMutability: 'view' },
-  };
-
-  // First check if it's a common selector we already know
-  if (commonSelectors[selector]) {
-    return commonSelectors[selector];
-  }
-  
-  // Try to look it up from 4byte.directory
-  try {
-    const response = await fetch(`https://www.4byte.directory/api/v1/signatures/?hex_signature=${selector}`);
-    
-    if (response.ok) {
-      const data = await response.json();
-      
-      if (data.results && data.results.length > 0) {
-        // Use the first signature (most popular)
-        const signature = data.results[0].text_signature;
-        
-        // Parse the signature
-        const match = signature.match(/(\w+)\((.*)\)/);
-        if (match) {
-          const name = match[1];
-          const inputTypesStr = match[2];
-          const inputTypes = inputTypesStr ? inputTypesStr.split(',') : [];
-          
-          return {
-            name,
-            signature,
-            inputTypes,
-            outputTypes: ['unknown'], // We can't know this from 4byte.directory
-            stateMutability: 'unknown'
+        if (contractInfo.abi && contractInfo.abi.length > 0) {
+          abi = contractInfo.abi;
+          source = 'moralis';
+          isVerified = contractInfo.isVerified;
+          additionalInfo = {
+            name: contractInfo.name,
+            symbol: contractInfo.symbol,
+            contractType: contractInfo.contractType,
+            isVerified: contractInfo.isVerified,
+            totalSupply: contractInfo.totalSupply,
+            decimals: contractInfo.decimals
           };
+          
+          console.log(`✅ Successfully fetched ABI via Moralis (${abi.length} functions)`);
         }
+      } else {
+        console.warn(`Chain ${chainId} not supported by Moralis`);
+      }
+    } catch (moralisError) {
+      console.warn('Moralis service failed, trying fallback methods:', moralisError);
+    }
+
+    // Strategy 2: Try network adapter's built-in ABI fetching
+    if (abi.length === 0) {
+      try {
+        console.log('Attempting to fetch ABI via network adapter...');
+        const adapterAbi = await adapter.getContractAbi(contractAddress);
+        
+        if (adapterAbi && adapterAbi.length > 0) {
+          abi = adapterAbi;
+          source = 'network_adapter';
+          isVerified = true;
+          
+          console.log(`✅ Successfully fetched ABI via network adapter (${abi.length} functions)`);
+        }
+      } catch (adapterError) {
+        console.warn('Network adapter ABI fetch failed:', adapterError);
       }
     }
-  } catch (error) {
-    console.error(`Error looking up signature for ${selector}:`, error);
+
+    // Strategy 3: Try blockchain explorer APIs (Etherscan-like)
+    if (abi.length === 0) {
+      try {
+        console.log('Attempting to fetch ABI via blockchain explorer...');
+        const explorerAbi = await fetchFromBlockchainExplorer(contractAddress, adapter);
+        
+        if (explorerAbi && explorerAbi.length > 0) {
+          abi = explorerAbi.abi || explorerAbi;
+          source = 'blockchain_explorer';
+          isVerified = explorerAbi.isVerified || true;
+          additionalInfo = explorerAbi.additionalInfo || {};
+          
+          console.log(`✅ Successfully fetched ABI via blockchain explorer (${abi.length} functions)`);
+        }
+      } catch (explorerError) {
+        console.warn('Blockchain explorer ABI fetch failed:', explorerError);
+      }
+    }
+
+    // Strategy 4: Bytecode analysis and function signature detection
+    if (abi.length === 0 && analysisMethod === 'comprehensive') {
+      try {
+        console.log('Attempting to detect functions from bytecode...');
+        const detectedFunctions = await detectFunctionsFromBytecode(contractAddress, adapter);
+        
+        if (detectedFunctions && detectedFunctions.length > 0) {
+          abi = detectedFunctions;
+          source = 'bytecode_analysis';
+          isVerified = false;
+          additionalInfo.note = 'Functions detected from bytecode analysis. Results may be incomplete.';
+          
+          console.log(`✅ Detected ${abi.length} functions from bytecode analysis`);
+        }
+      } catch (bytecodeError) {
+        console.warn('Bytecode analysis failed:', bytecodeError);
+      }
+    }
+
+    // Return results
+    if (abi.length === 0) {
+      return NextResponse.json(
+        { 
+          error: 'No ABI found for this contract. The contract might not be verified or deployed.',
+          contractAddress,
+          networkId: adapter.getConfig().id,
+          networkName: adapter.getConfig().name,
+          strategies_attempted: ['moralis', 'network_adapter', 'blockchain_explorer', 'bytecode_analysis']
+        },
+        { status: 404 }
+      );
+    }
+
+    // Enhance ABI with additional metadata
+    const enhancedAbi = enhanceAbiWithMetadata(abi, additionalInfo);
+
+    return NextResponse.json({
+      abi: enhancedAbi,
+      source,
+      isVerified,
+      contractAddress,
+      networkId: adapter.getConfig().id,
+      networkName: adapter.getConfig().name,
+      functionCount: enhancedAbi.filter(item => item.type === 'function').length,
+      eventCount: enhancedAbi.filter(item => item.type === 'event').length,
+      additionalInfo,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error: any) {
+    console.error('Error fetching contract ABI:', error);
+    
+    return NextResponse.json(
+      { 
+        error: error.message || 'Failed to fetch contract ABI',
+        details: error.stack && process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
+      { status: 500 }
+    );
   }
+}
+
+/**
+ * Fetch ABI from blockchain explorer APIs (Etherscan-like)
+ */
+async function fetchFromBlockchainExplorer(contractAddress: string, adapter: any): Promise<any> {
+  const networkConfig = adapter.getConfig();
   
-  // If all else fails, return a generic placeholder
-  return {
-    name: `function_${selector.substring(2, 6)}`,
-    signature: `function_${selector.substring(2, 6)}()`,
-    inputTypes: [],
-    outputTypes: ['unknown'],
-    stateMutability: 'nonpayable'
-  };
+  // For Ethereum networks, try Etherscan API
+  if (networkConfig.type === 'ethereum' || networkConfig.chainId === 1 || networkConfig.chainId === 11155111) {
+    const apiKey = process.env.ETHERSCAN_API_KEY;
+    if (!apiKey) {
+      throw new Error('Etherscan API key not configured');
+    }
+
+    const baseUrl = networkConfig.chainId === 1 
+      ? 'https://api.etherscan.io/api'
+      : 'https://api-sepolia.etherscan.io/api';
+
+    const response = await fetch(`${baseUrl}?module=contract&action=getabi&address=${contractAddress}&apikey=${apiKey}`);
+    
+    if (!response.ok) {
+      throw new Error(`Etherscan API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.status === '1' && data.result) {
+      const abi = JSON.parse(data.result);
+      return {
+        abi,
+        isVerified: true,
+        additionalInfo: {
+          source: 'etherscan',
+          verified: true
+        }
+      };
+    }
+    
+    throw new Error(data.result || 'Contract not verified on Etherscan');
+  }
+
+  // For other networks, could add more explorer APIs
+  throw new Error(`No blockchain explorer API available for network ${networkConfig.name}`);
+}
+
+/**
+ * Detect function signatures from contract bytecode
+ */
+async function detectFunctionsFromBytecode(contractAddress: string, adapter: any): Promise<any[]> {
+  try {
+    // Get contract bytecode
+    const bytecode = await adapter.getContractBytecode(contractAddress);
+    
+    if (!bytecode || bytecode === '0x') {
+      throw new Error('No bytecode found');
+    }
+
+    // Extract function selectors (4-byte function signatures)
+    const selectorRegex = /63([0-9a-f]{8})/gi;
+    const selectors = new Set<string>();
+    let match;
+    
+    while ((match = selectorRegex.exec(bytecode)) !== null) {
+      selectors.add('0x' + match[1]);
+    }
+
+    if (selectors.size === 0) {
+      throw new Error('No function selectors found in bytecode');
+    }
+
+    console.log(`Found ${selectors.size} potential function selectors`);
+
+    // Resolve selectors to function signatures using 4byte.directory
+    const resolvedFunctions: any[] = [];
+    
+    for (const selector of Array.from(selectors).slice(0, 20)) { // Limit to prevent excessive API calls
+      try {
+        const response = await fetch(`https://www.4byte.directory/api/v1/signatures/?hex_signature=${selector}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.results && data.results.length > 0) {
+            // Get the most likely signature
+            const signature = data.results[0].text_signature;
+            const parsedFunction = parseSignatureToAbi(signature, selector);
+            
+            if (parsedFunction) {
+              resolvedFunctions.push(parsedFunction);
+            }
+          }
+        }
+      } catch (error) {
+        console.warn(`Failed to resolve selector ${selector}:`, error);
+      }
+    }
+
+    return resolvedFunctions;
+  } catch (error) {
+    console.error('Error detecting functions from bytecode:', error);
+    return [];
+  }
+}
+
+/**
+ * Parse function signature to ABI format
+ */
+function parseSignatureToAbi(signature: string, selector: string): any {
+  try {
+    // Parse signature like "transfer(address,uint256)"
+    const funcNameMatch = signature.match(/^([^(]+)\(/);
+    const funcName = funcNameMatch ? funcNameMatch[1] : 'unknown';
+    
+    // Parse parameters
+    const paramsMatch = signature.match(/\((.*)\)/);
+    const paramsStr = paramsMatch ? paramsMatch[1] : '';
+    
+    const inputs = paramsStr.split(',').filter(Boolean).map((param, i) => {
+      const trimmed = param.trim();
+      const type = trimmed || 'bytes32';
+      return { 
+        type, 
+        name: `param${i}`,
+        internalType: type
+      };
+    });
+
+    return {
+      type: 'function',
+      name: funcName,
+      inputs,
+      outputs: [],
+      stateMutability: 'nonpayable', // Default assumption
+      signature,
+      selector,
+      detected: true
+    };
+  } catch (error) {
+    console.warn(`Failed to parse signature ${signature}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Enhance ABI with additional metadata and standardization
+ */
+function enhanceAbiWithMetadata(abi: any[], additionalInfo: any): any[] {
+  return abi.map(item => {
+    // Ensure all required fields are present
+    const enhanced = {
+      ...item,
+      type: item.type || 'function',
+      name: item.name || 'unknown',
+      inputs: item.inputs || [],
+      outputs: item.outputs || []
+    };
+
+    // Add stateMutability if missing
+    if (enhanced.type === 'function' && !enhanced.stateMutability) {
+      // Try to infer from function name and inputs
+      if (enhanced.name.startsWith('get') || enhanced.name.startsWith('view') || enhanced.name.includes('Balance')) {
+        enhanced.stateMutability = 'view';
+      } else {
+        enhanced.stateMutability = 'nonpayable';
+      }
+    }
+
+    // Add human-readable descriptions for common functions
+    if (enhanced.type === 'function') {
+      enhanced.description = generateFunctionDescription(enhanced);
+    }
+
+    return enhanced;
+  });
+}
+
+/**
+ * Generate human-readable descriptions for functions
+ */
+function generateFunctionDescription(func: any): string {
+  const name = func.name;
+  const isView = func.stateMutability === 'view' || func.stateMutability === 'pure';
+  
+  // Common function patterns
+  if (name === 'balanceOf') return 'Get the token balance of an address';
+  if (name === 'transfer') return 'Transfer tokens to another address';
+  if (name === 'approve') return 'Approve another address to spend tokens';
+  if (name === 'totalSupply') return 'Get the total token supply';
+  if (name === 'owner') return 'Get the contract owner address';
+  if (name === 'pause') return 'Pause contract operations';
+  if (name === 'unpause') return 'Resume contract operations';
+  if (name.startsWith('get')) return `Get ${name.substring(3).toLowerCase()} information`;
+  if (name.startsWith('set') && !isView) return `Set ${name.substring(3).toLowerCase()} value`;
+  if (name.startsWith('is')) return `Check if ${name.substring(2).toLowerCase()} condition is true`;
+  if (name.startsWith('has')) return `Check if ${name.substring(3).toLowerCase()} exists`;
+  
+  return isView ? `View function: ${name}` : `Execute function: ${name}`;
 } 

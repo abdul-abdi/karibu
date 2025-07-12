@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Menu, X, Github, Code, Cpu, BookOpen, Map } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { ThemeSwitcher } from '../providers/theme-provider';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 const navItems = [
   { name: 'Home', path: '/' },
@@ -43,7 +44,7 @@ export default function Header() {
         damping: 10
       }
     }
-  };
+  } as any;
 
   const navVariants = {
     hidden: { opacity: 0 },
@@ -54,7 +55,7 @@ export default function Header() {
         delayChildren: 0.3
       }
     }
-  };
+  } as any;
 
   const navItemVariants = {
     hidden: { opacity: 0, y: -20 },
@@ -76,7 +77,7 @@ export default function Header() {
         damping: 10
       }
     }
-  };
+  } as any;
 
   const mobileMenuVariants = {
     closed: { 
@@ -95,7 +96,7 @@ export default function Header() {
         delayChildren: 0.2
       }
     }
-  };
+  } as any;
 
   const mobileNavItemVariants = {
     closed: { opacity: 0, x: -10 },
@@ -108,7 +109,7 @@ export default function Header() {
         damping: 15
       }
     }
-  };
+  } as any;
   
   // Animated background elements
   const bgDecorVariants = {
@@ -117,7 +118,7 @@ export default function Header() {
       opacity: 0.09,
       transition: { duration: 2, delay: 0.5 }
     }
-  };
+  } as any;
 
   return (
     <header className="relative backdrop-blur-sm bg-background/80 border-b border-border/40 z-40">
@@ -188,7 +189,9 @@ export default function Header() {
 
           {/* Theme Switcher, GitHub Link and Mobile Menu Button */}
           <div className="flex items-center space-x-4">
-            <ThemeSwitcher />
+          <ConnectButton accountStatus="avatar" chainStatus="icon" showBalance={false} />
+          <ThemeSwitcher />
+           
             
             <a
               href="https://github.com/abdul-abdi/karibu"

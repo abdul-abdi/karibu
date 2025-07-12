@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Code, FileText, ExternalLink, Clock, Shield, Zap, ChevronDown, Bot, CheckCircle, Wallet } from 'lucide-react';
-import { Button } from '../components/ui/button';
+import { Button } from '@/components/ui/button';
 
 // Sample code animation text
 const sampleCode = `// SPDX-License-Identifier: MIT

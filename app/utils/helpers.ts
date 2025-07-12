@@ -419,3 +419,106 @@ export function prepareContractForDeployment(bytecode: string, abi: any): {
     isLarge: isLarge
   };
 } 
+
+/**
+ * Check the status of network configurations and provide helpful information
+ */
+export function checkNetworkStatus(): {
+  walletConnect: { configured: boolean; message: string };
+  hedera: { configured: boolean; message: string };
+  ethereum: { configured: boolean; message: string };
+  overall: { status: 'good' | 'partial' | 'needs_config'; summary: string };
+} {
+  const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+  const hederaOperatorId = process.env.HEDERA_OPERATOR_ID;
+  const hederaOperatorKey = process.env.HEDERA_OPERATOR_KEY;
+  const ethereumPrivateKey = process.env.ETHEREUM_PRIVATE_KEY;
+
+  const walletConnect = {
+    configured: !!(walletConnectProjectId && walletConnectProjectId !== 'demo' && !walletConnectProjectId.includes('YOUR_PROJECT_ID')),
+    message: ''
+  };
+
+  const hedera = {
+    configured: !!(hederaOperatorId && hederaOperatorKey && 
+                   !hederaOperatorId.includes('YOUR_ACCOUNT_ID') && 
+                   !hederaOperatorKey.includes('YOUR_PRIVATE_KEY')),
+    message: ''
+  };
+
+  const ethereum = {
+    configured: !!(ethereumPrivateKey && !ethereumPrivateKey.includes('YOUR_PRIVATE_KEY')),
+    message: ''
+  };
+
+  // Set messages
+  if (walletConnect.configured) {
+    walletConnect.message = 'WalletConnect properly configured';
+  } else {
+    walletConnect.message = 'WalletConnect Project ID needed - get one from https://cloud.walletconnect.com/';
+  }
+
+  if (hedera.configured) {
+    hedera.message = 'Hedera credentials configured - full functionality available';
+  } else {
+    hedera.message = 'Hedera credentials missing - read-only mode (this is normal for most users)';
+  }
+
+  if (ethereum.configured) {
+    ethereum.message = 'Ethereum private key configured - can deploy and execute transactions';
+  } else {
+    ethereum.message = 'Ethereum private key missing - read-only mode (this is normal for most users)';
+  }
+
+  // Determine overall status
+  let overall: { status: 'good' | 'partial' | 'needs_config'; summary: string };
+
+  if (walletConnect.configured) {
+    if (hedera.configured || ethereum.configured) {
+      overall = {
+        status: 'good',
+        summary: 'All major features are available. WalletConnect is configured and at least one network has full functionality.'
+      };
+    } else {
+      overall = {
+        status: 'partial',
+        summary: 'WalletConnect is configured. Networks are in read-only mode (normal for most users).'
+      };
+    }
+  } else {
+    overall = {
+      status: 'needs_config',
+      summary: 'WalletConnect Project ID needed for wallet connections. Get one from https://cloud.walletconnect.com/'
+    };
+  }
+
+  return { walletConnect, hedera, ethereum, overall };
+}
+
+/**
+ * Log network status information to console
+ */
+export function logNetworkStatus(): void {
+  const status = checkNetworkStatus();
+  
+  console.group('🔗 Network Configuration Status');
+  console.log(`Overall Status: ${status.overall.status.toUpperCase()}`);
+  console.log(`Summary: ${status.overall.summary}`);
+  console.log('');
+  
+  console.log(`💳 WalletConnect: ${status.walletConnect.configured ? '✅' : '❌'} ${status.walletConnect.message}`);
+  console.log(`🌐 Hedera: ${status.hedera.configured ? '✅' : '⚠️ '} ${status.hedera.message}`);
+  console.log(`⚡ Ethereum: ${status.ethereum.configured ? '✅' : '⚠️ '} ${status.ethereum.message}`);
+  
+  if (status.overall.status === 'needs_config') {
+    console.log('');
+    console.log('🔧 Quick Fix:');
+    console.log('1. Go to https://cloud.walletconnect.com/');
+    console.log('2. Create a new project');
+    console.log('3. Copy your Project ID');
+    console.log('4. Add to .env.local: NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id');
+    console.log('5. Restart your development server');
+  }
+  
+  console.groupEnd();
+} 

@@ -2,19 +2,22 @@
 
 import * as React from 'react';
 import { AlertCircle, ArrowRight, Check, CheckCircle, Code, Copy, ExternalLink, FileCode, Loader2, Shield, ChevronDown, ChevronUp, AlertOctagon, X, Code2Icon } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Progress } from '../../components/ui/progress';
-import { Badge } from '../../components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert';
-import { Card, CardContent } from '../../components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, Info } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../components/ui/accordion';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../components/ui/tooltip';
-import { useToast } from '../../components/providers/toast-provider';
-import { useState } from 'react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useToast } from '@/components/providers/toast-provider';
+import { useState, useEffect } from 'react';
+import { networkService } from '../utils/networks/network-service';
+import { useChainId } from 'wagmi';
+import networkRegistry from '../utils/networks/network-registry';
 
 interface ActionButtonsProps {
   handleValidate: () => Promise<void>;
@@ -215,6 +218,28 @@ export const StatusPanel: React.FC<StatusPanelProps> = ({
   const router = useRouter();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const chainId = useChainId();
+
+  // Function to get the correct explorer URL based on wallet's current network
+  const getExplorerUrl = (contractAddress: string): string => {
+    // First try to find network by chain ID from Wagmi
+    if (chainId) {
+      const networks = networkRegistry.getAllNetworks();
+      const network = networks.find(n => n.chainId === chainId);
+      if (network) {
+        return `${network.explorerUrl}/address/${contractAddress}`;
+      }
+    }
+    
+    // Fallback to network service's active adapter
+    const adapter = networkService.getAdapter();
+    if (adapter) {
+      return adapter.getExplorerUrl('address', contractAddress);
+    }
+    
+    // Final fallback to a generic explorer (shouldn't happen)
+    return `https://etherscan.io/address/${contractAddress}`;
+  };
 
   const handleCopyAddress = () => {
     if (contractAddress) {
@@ -486,11 +511,16 @@ export const StatusPanel: React.FC<StatusPanelProps> = ({
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => window.open(`https://hashscan.io/testnet/contract/${contractAddress}`, '_blank')}
+                    onClick={() => {
+                      if (contractAddress) {
+                        const explorerUrl = getExplorerUrl(contractAddress);
+                        window.open(explorerUrl, '_blank');
+                      }
+                    }}
                     className="flex-1 h-8 text-xs"
                   >
                     <ExternalLink className="h-3 w-3 mr-1" />
-                    View on HashScan
+                    View on Explorer
                   </Button>
                 </div>
               </div>

@@ -3,6 +3,7 @@
     "next/core-web-vitals",
     "eslint:recommended"
   ],
+  "plugins": ["@typescript-eslint"],
   "rules": {
     "@typescript-eslint/no-unused-vars": "off",
     "no-unused-vars": "off",
@@ -16,6 +17,21 @@
     "react/jsx-no-comment-textnodes": "off",
     "no-useless-escape": "off",
     "react-hooks/exhaustive-deps": "warn",
-    "no-control-regex": "off"
+    "no-control-regex": "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["../components/*", "../../components/*", "../../../components/*", "../../../../components/*"],
+            "message": "Use @/components/* instead of relative imports to components directory"
+          },
+          {
+            "group": ["../lib/*", "../../lib/*"],
+            "message": "Use @/lib/* instead of relative imports to lib directory"
+          }
+        ]
+      }
+    ]
   }
 }

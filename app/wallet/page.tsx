@@ -3,14 +3,15 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, ExternalLink, Wallet, Box, Loader2, List, ChevronRight } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import { useToast } from '../../components/providers/toast-provider';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/providers/toast-provider';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { formatToEvmAddress } from '../../app/utils/contract-utils';
+import { networkService } from '../utils/networks/network-service';
 
 type SmartContract = {
   contract_id: string;
@@ -576,10 +577,16 @@ const WalletContractsPage = () => {
                               <div className="flex items-start text-sm">
                                 <span className="text-muted-foreground w-24">Transaction:</span>
                                 <a 
-                                  href={`https://hashscan.io/testnet/transaction/${contract.transaction_id}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-primary hover:underline truncate max-w-[180px]"
+                                  href="#"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    const adapter = networkService.getAdapter();
+                                    if (adapter) {
+                                      const explorerUrl = adapter.getExplorerUrl('transaction', contract.transaction_id);
+                                      window.open(explorerUrl, '_blank');
+                                    }
+                                  }}
+                                  className="text-xs text-primary hover:underline truncate max-w-[180px] cursor-pointer"
                                 >
                                   {contract.transaction_id}
                                 </a>
@@ -592,17 +599,17 @@ const WalletContractsPage = () => {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              asChild
+                              onClick={() => {
+                                const adapter = networkService.getAdapter();
+                                if (adapter) {
+                                  const explorerUrl = adapter.getExplorerUrl('address', contract.contract_id);
+                                  window.open(explorerUrl, '_blank');
+                                }
+                              }}
+                              className="flex items-center cursor-pointer"
                             >
-                              <a 
-                                href={`https://hashscan.io/testnet/contract/${contract.contract_id}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center"
-                              >
-                                <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                                HashScan
-                              </a>
+                              <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                              Explorer
                             </Button>
                             <Button 
                               variant="default" 

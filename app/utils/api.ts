@@ -1,4 +1,5 @@
 import { CompilationResult, DeploymentResult, ContractCallResult, ContractAnalysisResult } from '../types/contract';
+import { networkService } from './networks/network-service';
 
 /**
  * Compile a Solidity smart contract
@@ -67,14 +68,16 @@ export async function compileMultipleFiles(
 export async function deployContract(
   bytecode: string, 
   abi: any[],
-  constructorArgs: any[] = []
+  constructorArgs: any[] = [],
+  networkIdParam?: string
 ): Promise<DeploymentResult> {
+  const networkId = networkIdParam || networkService.getActiveNetwork()?.id;
   const response = await fetch('/api/deploy', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ bytecode, abi, constructorArgs }),
+    body: JSON.stringify({ bytecode, abi, constructorArgs, networkId }),
   });
   
   if (!response.ok) {
@@ -109,6 +112,7 @@ export async function deployContract(
  * @param functionInputs The function parameters
  * @param stateMutability The function's state mutability (view, pure, nonpayable, etc.)
  * @param outputs The expected output types
+ * @param abi The contract ABI (optional but recommended)
  * @returns The result of the function call
  */
 export async function callContractFunction(
@@ -116,9 +120,22 @@ export async function callContractFunction(
   functionName: string,
   functionInputs: Array<{ name: string; type: string; value: string }>,
   stateMutability: string,
-  outputs: Array<{ type: string }>
+  outputs: Array<{ type: string }>,
+  networkIdParam?: string,
+  abi?: any[]
 ): Promise<ContractCallResult> {
-  const response = await fetch('/api/call-contract', {
+  const networkId = networkIdParam || networkService.getActiveNetwork()?.id;
+  
+  // Determine if this is a read operation
+  const isRead = stateMutability === 'view' || stateMutability === 'pure';
+  
+  // Convert function inputs to the new parameter format
+  const parameters = functionInputs.map(input => ({
+    type: input.type,
+    value: input.value
+  }));
+  
+  const response = await fetch('/api/contract/call', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -126,9 +143,13 @@ export async function callContractFunction(
     body: JSON.stringify({
       contractAddress,
       functionName,
-      functionInputs,
+      parameters,
+      functionInputs, // Keep for backward compatibility
+      isQuery: isRead,
       stateMutability,
       outputs,
+      networkId,
+      abi,
     }),
   });
   
@@ -137,7 +158,16 @@ export async function callContractFunction(
     throw new Error(error.error || 'Failed to call contract function');
   }
   
-  return response.json();
+  const result = await response.json();
+  
+  // Convert response format for backward compatibility
+  return {
+    success: result.success,
+    result: result.result || result.data,
+    transactionId: result.transactionHash || result.transactionId,
+    gasUsed: result.gasUsed,
+    error: result.error
+  };
 }
 
 /**

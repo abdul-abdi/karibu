@@ -363,6 +363,33 @@ export async function executeJsonRpcCall(method: string, params: any[]): Promise
  * Get contract bytecode using eth_getCode
  */
 export async function getContractBytecode(contractAddress: string): Promise<string> {
+  // Try to use Moralis service first
+  try {
+    const { MoralisContractService } = await import('./moralis-contract-service');
+    const moralisService = MoralisContractService.getInstance();
+    const contractInfo = await moralisService.getContractInfo(contractAddress, 1); // Default to Ethereum mainnet
+    
+    if (contractInfo.bytecode && contractInfo.bytecode !== '0x') {
+      return contractInfo.bytecode;
+    }
+  } catch (error) {
+    console.warn('Moralis service not available, falling back to network adapter:', error);
+  }
+
+  // Fallback to network adapter
+  try {
+    const { networkService } = await import('./networks/network-service');
+    if (networkService.isInitialized()) {
+      const adapter = networkService.getAdapter();
+      if (adapter) {
+        return await adapter.getContractBytecode(contractAddress);
+      }
+    }
+  } catch (error) {
+    console.warn('Network service not available, falling back to direct RPC call:', error);
+  }
+
+  // Final fallback to direct RPC call
   const evmAddress = formatToEvmAddress(contractAddress);
   return executeJsonRpcCall('eth_getCode', [evmAddress, 'latest']);
 }

@@ -3,26 +3,26 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '../../components/ui/button';
-import { Textarea } from '../../components/ui/textarea';
-import { ScrollArea } from '../../components/ui/scroll-area';
-import { Progress } from '../../components/ui/progress';
-import { Card, CardContent } from '../../components/ui/card';
-import { Label } from '../../components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Progress } from '@/components/ui/progress';
+import { Card, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle, Check, Code, Loader2, ArrowRight, FileCode, Shield, Copy, ExternalLink, Clipboard, CheckCircle, Info, AlertTriangle, InfoIcon, FileUpIcon, AlertTriangleIcon, Code2Icon, X } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
-import { Badge } from '../../components/ui/badge';
-import { compileContract, deployContract } from '../utils/api';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { compileContract } from '../utils/api';
 import { sampleContracts, getDefaultSampleContract } from '../data/sample-contracts';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import SolidityEditor from './SolidityEditor';
 import { ActionButtons, StatusPanel, TipsPanel, IDEDetailsPanel } from './ButtonActions';
 import MultiFileIDE, { MultiFileIDEHandle } from './MultiFileIDE';
-import { FileSystemProvider } from '../../components/providers/file-system-provider';
-import { ToastProvider, useToast } from '../../components/providers/toast-provider';
+import { FileSystemProvider } from '@/components/providers/file-system-provider';
+import { ToastProvider, useToast } from '@/components/providers/toast-provider';
 import { 
   Dialog, 
   DialogContent, 
@@ -30,8 +30,9 @@ import {
   DialogFooter, 
   DialogHeader, 
   DialogTitle 
-} from '../../components/ui/dialog';
-import { Input } from '../../components/ui/input';
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { useContractDeployer } from '../hooks/useContractDeployer';
 
 // Simple Toggle Switch component
 const Switch = ({ checked, onChange, className = "" }) => {
@@ -225,6 +226,7 @@ const CreateContractPage = () => {
   const multiFileIDERef = React.useRef<MultiFileIDEHandle>(null);
   const { toast } = useToast();
   const [showTemplateToast, setShowTemplateToast] = useState(false);
+  const { deploy: deployClient } = useContractDeployer();
 
   useEffect(() => {
     // Set default sample contract
@@ -593,8 +595,14 @@ const CreateContractPage = () => {
       setDeploymentStage('deploy');
       console.log('Deployment stage: deploy');
       
-      // Call actual deployment endpoint
-      const result = await deployContract(target.bytecode, target.abi, constructorArguments);
+      // Call actual deployment via wallet
+      const address = await deployClient({
+        abi: target.abi as any,
+        bytecode: target.bytecode as `0x${string}`,
+        args: constructorArguments
+      });
+
+      const result = { contractAddress: address };
       console.log('Deployment result:', result);
       
       // Deployment confirmed

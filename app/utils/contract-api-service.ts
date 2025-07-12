@@ -33,7 +33,8 @@ export const analyzeContract = async (contractAddress: string, abi: ContractFunc
 export const verifyFunction = async (
   contractAddress: string, 
   functionName: string, 
-  inputTypes: string[]
+  inputTypes: string[],
+  networkId?: string
 ) => {
   try {
     const response = await fetch('/api/verify-function', {
@@ -42,7 +43,8 @@ export const verifyFunction = async (
       body: JSON.stringify({
         contractAddress,
         functionName,
-        inputTypes
+        inputTypes,
+        networkId
       }),
     });
 
@@ -59,114 +61,82 @@ export const verifyFunction = async (
 };
 
 /**
- * Call a contract function (either read or write)
- */
-export const callContractFunction = async (
-  contractAddress: string, 
-  functionName: string, 
-  parameters: any[],
-  abi?: ContractFunction[],
-  isReadFunction?: boolean
-) => {
-  try {
-    // Build the request body
-    const requestBody: any = {
-      contractAddress,
-      functionName,
-      parameters: parameters || [],
-      isQuery: isReadFunction
-    };
-    
-    // Only include ABI if it exists - this allows for fallback to direct selector calling
-    const isDirectCall = !abi || abi.length === 0;
-    if (!isDirectCall) {
-      requestBody.abi = abi;
-    } else {
-      console.log('No ABI provided for function call - will use direct function selector');
-      // Check if this is likely a bytecode-derived function call
-      const functionExists = await verifyFunction(contractAddress, functionName, 
-        parameters.map(p => (p.type || 'unknown')));
-      
-      if (!functionExists.exists) {
-        console.warn(`Function ${functionName} not verified in bytecode, but attempting call anyway.`);
-      }
-    }
-
-    // Call the appropriate API endpoint
-    const response = await fetch('/api/call-contract', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      
-      // Add more context to error messages for unverified functions
-      if (isDirectCall && errorData.error) {
-        throw new Error(`${errorData.error} (Note: Using bytecode-derived function signature without verified ABI)`);
-      }
-      
-      throw new Error(errorData.error || `Error calling function: ${response.statusText}`);
-    }
-
-    return await response.json();
-  } catch (error: any) {
-    console.error('Error calling contract function:', error);
-    throw new Error(error.message || 'An error occurred while calling the contract function');
-  }
-};
-
-/**
- * Fetch contract ABI
+ * Fetch contract ABI from a contract address
+ * @param contractAddress The contract address
+ * @param options Configuration options for ABI fetching
+ * @returns The ABI array or throws an error
  */
 export const fetchContractAbi = async (contractAddress: string, options: {
   forceRefresh?: boolean;
   preferSource?: boolean;
   analysisMethod?: string;
   bypassCache?: boolean;
-} = {}) => {
+  networkId?: string;
+} = {}): Promise<ContractFunction[]> => {
   try {
-    // Generate a unique timestamp to prevent caching
-    const timestamp = Date.now() + Math.random().toString(36).substring(2);
+    // Use Moralis service for better reliability and coverage
+    const { MoralisContractService } = await import('./moralis-contract-service');
     
-    const response = await fetch('/api/get-contract-abi', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contractAddress,
-        cacheBuster: timestamp,
-        forceRefresh: options.forceRefresh || true,
-        preferSource: options.preferSource || true,
-        analysisMethod: options.analysisMethod || 'bytecode',
-        bypassCache: options.bypassCache || true,
-        regenerateAbi: true
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `Failed to fetch ABI: ${response.statusText}`);
-    }
-
-    return await response.json();
+    const moralisService = MoralisContractService.getInstance();
+    const contractInfo = await moralisService.getContractInfo(
+      contractAddress,
+      parseInt(options.networkId || '1')
+    );
+    
+    // Return the ABI in the expected format
+    return contractInfo.abi || [];
   } catch (error: any) {
-    console.error('Error fetching contract ABI:', error);
-    throw error;
+    console.error('Error fetching contract ABI via Moralis service:', error);
+    
+    // Fallback to the original API endpoint if the new service fails
+    try {
+      console.log('Falling back to original API endpoint...');
+      
+      const timestamp = Date.now() + Math.random().toString(36).substring(2);
+      
+      const response = await fetch('/api/get-contract-abi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contractAddress,
+          cacheBuster: timestamp,
+          forceRefresh: options.forceRefresh || true,
+          preferSource: options.preferSource || true,
+          analysisMethod: options.analysisMethod || 'bytecode',
+          bypassCache: options.bypassCache || true,
+          regenerateAbi: true,
+          networkId: options.networkId
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to fetch ABI: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      // Return the ABI array directly
+      return result.abi || result || [];
+    } catch (fallbackError: any) {
+      console.error('Fallback API also failed:', fallbackError);
+      throw new Error(`Failed to fetch contract ABI: ${error.message}`);
+    }
   }
 };
 
 /**
  * Verify contract ABI functions against bytecode
  */
-export const verifyAbi = async (contractAddress: string, abi: ContractFunction[]) => {
+export const verifyAbi = async (contractAddress: string, abi: ContractFunction[], networkId?: string) => {
   try {
     const response = await fetch('/api/verify-abi', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contractAddress,
-        abi
+        abi,
+        networkId
       }),
     });
 

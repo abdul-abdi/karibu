@@ -1,23 +1,23 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useImperativeHandle, forwardRef, useRef, useMemo } from 'react';
-import { useFileSystem } from '../../components/providers/file-system-provider';
-import { FileExplorer, FileSystemItem } from '../../components/ui/file-explorer';
-import { TabsManager } from '../../components/ui/tabs-manager';
+import { useFileSystem } from '@/components/providers/file-system-provider';
+import { FileExplorer, FileSystemItem } from '@/components/ui/file-explorer';
+import { TabsManager } from '@/components/ui/tabs-manager';
 import SolidityEditor from './SolidityEditor';
 import { compileContract, compileMultipleFiles } from '../utils/api';
-import { useToast } from '../../components/providers/toast-provider';
-import { Button } from '../../components/ui/button';
+import { useToast } from '@/components/providers/toast-provider';
+import { Button } from '@/components/ui/button';
 import { FilePlus, Sparkles, FolderPlus, FileCode, AlertTriangle, ChevronDown, FilesIcon, ExternalLinkIcon, CheckCircleIcon, CodeIcon, FileUpIcon, Copy, X, Check, Loader2, ExternalLink } from 'lucide-react';
-import { ScrollArea } from '../../components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
-import { Badge } from '../../components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuItem
-} from '../../components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -25,14 +25,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../components/ui/dialog';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { v4 as uuidv4 } from 'uuid';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Progress } from '../../components/ui/progress';
+import { Progress } from '@/components/ui/progress';
 import { StatusPanel } from './ButtonActions';
+import { networkService } from '../utils/networks/network-service';
+import { useChainId } from 'wagmi';
+import networkRegistry from '../utils/networks/network-registry';
 
 interface MultiFileIDEProps {
   onCompile: (result: any, fileId: string) => void;
@@ -603,6 +606,29 @@ const MultiFileIDE = forwardRef<MultiFileIDEHandle, MultiFileIDEProps>(({
 }, ref) => {
   const { toast } = useToast();
   const router = useRouter();
+  const chainId = useChainId();
+
+  // Function to get the correct explorer URL based on wallet's current network
+  const getExplorerUrl = (contractAddress: string): string => {
+    // First try to find network by chain ID from Wagmi
+    if (chainId) {
+      const networks = networkRegistry.getAllNetworks();
+      const network = networks.find(n => n.chainId === chainId);
+      if (network) {
+        return `${network.explorerUrl}/address/${contractAddress}`;
+      }
+    }
+    
+    // Fallback to network service's active adapter
+    const adapter = networkService.getAdapter();
+    if (adapter) {
+      return adapter.getExplorerUrl('address', contractAddress);
+    }
+    
+    // Final fallback to a generic explorer (shouldn't happen)
+    return `https://etherscan.io/address/${contractAddress}`;
+  };
+
   const {
     files,
     currentFile,
@@ -2425,11 +2451,16 @@ const MultiFileIDE = forwardRef<MultiFileIDEHandle, MultiFileIDEProps>(({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open(`https://hashscan.io/testnet/contract/${deploymentResult.address}`, '_blank')}
+                onClick={() => {
+                  if (deploymentResult.address) {
+                    const explorerUrl = getExplorerUrl(deploymentResult.address);
+                    window.open(explorerUrl, '_blank');
+                  }
+                }}
                 className="flex-1 h-8 text-xs"
               >
                 <ExternalLinkIcon className="h-3 w-3 mr-1" />
-                View on HashScan
+                View on Explorer
               </Button>
             </div>
           </motion.div>

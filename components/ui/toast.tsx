@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { motion, AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { X, CheckCircle2, AlertCircle, Info } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn } from '@/lib/utils';
 
 export interface ToastProps {
   id: string;
@@ -97,3 +97,53 @@ export function ToastContainer({
     </div>
   );
 } 
+
+// WalletConnect specific error handler
+export const handleWalletConnectError = (error: Error, toast: any) => {
+  const errorMessage = error.message.toLowerCase();
+  
+  if (errorMessage.includes('connection interrupted while trying to subscribe')) {
+    toast({
+      title: 'WalletConnect Connection Issue',
+      description: 'Connection was interrupted. This may be due to network issues or invalid configuration. Please try again or check your wallet connection.',
+      type: 'error',
+      duration: 8000,
+    });
+    
+    // Log additional info for debugging
+    console.error('WalletConnect Connection Error Details:', {
+      error: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString(),
+      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
+      suggestions: [
+        'Check if NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is set correctly',
+        'Verify network connectivity',
+        'Try refreshing the page',
+        'Check if the wallet app is running properly'
+      ]
+    });
+  } else if (errorMessage.includes('missing or invalid')) {
+    toast({
+      title: 'WalletConnect Configuration Error',
+      description: 'Invalid Project ID detected. Please check your environment configuration.',
+      type: 'error',
+      duration: 8000,
+    });
+  } else if (errorMessage.includes('unsupported chain')) {
+    toast({
+      title: 'Unsupported Chain',
+      description: 'The selected blockchain network is not supported by WalletConnect.',
+      type: 'error',
+      duration: 6000,
+    });
+  } else {
+    // Generic WalletConnect error
+    toast({
+      title: 'Wallet Connection Failed',
+      description: `Connection error: ${error.message}`,
+      type: 'error',
+      duration: 6000,
+    });
+  }
+}; 

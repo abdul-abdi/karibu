@@ -86,7 +86,7 @@ export const ThemeSwitcher = () => {
   const { theme, setTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
-  const variants = {
+  const variants: any = {
     open: { 
       height: "auto", 
       opacity: 1,
@@ -105,7 +105,7 @@ export const ThemeSwitcher = () => {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     open: { 
       y: 0, 
       opacity: 1,
